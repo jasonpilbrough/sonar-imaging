@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Sonar Imaging</title>
+  </head>
+  <body>
+    {% extends "template.html" %}
+    {% block content %}
+
+    <h1> Processed Range Profile </h1>
+      
+    <form action="refresh">
+    	<button type="submit"> Refresh Plot </button>
+	<form>
+	
+	<div>
+      
+    <img src="/plot.png" alt="my plot">
+    
+    {% endblock %}
+  </body>
+</html>
