@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Sonar Imaging</title>
+  </head>
+  <body>
+    {% extends "template.html" %}
+    {% block content %}
+
+
+    
+    			
+    
+    <div class="container">
+  		<div class="row">
+    		<div class="col-8">
+    			<h3> Processed Sonar Image </h3>
+    			<figure class="figure">
+    				<img id=mainplot class="figure-img img-fluid rounded" src="/plot.png" alt="my plot">
+  					<figcaption class="figure-caption text-right">Processed Range Profile</figcaption>
+				</figure>
+      			
+    		</div>
+    		<div class="col-4">
+    			<h3> Control Panel </h3>
+    			<div class="container">
+    				<div class="row">
+    					<h5> System Status</h5>
+					</div>
+					<div class="row">
+						<div class="col-6">
+							Current State
+						</div>
+						<div class="col-6">
+							<span class="badge badge-secondary badge-pill">Idle</span>
+						</div>
+					</div>
+					<div class="row">
+    					<div class="col-6">
+							Microcontroller
+						</div>
+						<div class="col-6">
+							<span class="badge badge-danger badge-pill">Not Connected</span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-6">
+							Internet
+						</div>
+						<div class="col-6">
+							<span class="badge badge-success badge-pill">Connected</span>
+						</div>
+					</div>
+					
+					<div class="row">
+    					<div class="col-6">
+							Battery Level
+						</div>
+						<div class="col-6">
+							<span class="badge badge-danger badge-pill">Not Connected</span>
+						</div>
+					</div>
+					<div class="row">
+    					<div class="col-6">
+							Refresh Rate
+						</div>
+						<div class="col-6">
+							<span class="badge badge-secondary badge-pill">N/A</span>
+						</div>
+					</div>
+				</div>
+				<div class="container">
+					<div class="row">
+    					<h5> Controls </h5>
+					</div>
+					<div class="row">
+						<div class="col-6">
+							<button type="button" class="btn btn-outline-info btn-block" onclick="setTimeout(loadDoc, 0)"> Run </button>
+						</div>
+						<div class="col-6">
+							<button type="button" class="btn btn-outline-danger btn-block" onclick="clearInterval(cont)">Stop</button>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-6">
+							<button type="button" class="btn btn-outline-info"onclick="cont = setInterval(loadDoc, 1000)">Run (cont)</button>
+						</div>
+					</div>
+				</div>
+				<div class="container">
+					<div class="row">
+    					<h5> Configuration </h5>
+					</div>
+					<div class="row">
+      					<div class="form-check form-check-inline">
+  							<input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1">
+  							<label class="form-check-label" for="inlineRadio1">Single Shot Imaging</label>
+						</div>
+						<div class="form-check form-check-inline">
+  							<input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2">
+  							<label class="form-check-label" for="inlineRadio2">Continuous Imaging</label>
+						</div>
+					</div>
+					<div class="row">
+      					<div class="dropdown">
+  							<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    							Display Mode
+  							</button>
+  							<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    							<a class="dropdown-item" href="#">1D Range Profiler</a>
+    							<a class="dropdown-item" href="#">2D Sonar Imaging action</a>
+ 							 </div>
+						</div>
+					</div>
+					<div class="row">
+      					<div class="form-check">
+  							<input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
+  							<label class="form-check-label" for="defaultCheck1">
+    							Range Compensation
+  							</label>
+						</div>
+					</div>
+					<div class="row">
+      					<div class="form-check">
+  							<input class="form-check-input" type="checkbox" value="" id="defaultCheck2">
+  							<label class="form-check-label" for="defaultCheck2">
+    							Debugging Mode
+  							</label>
+						</div>
+					</div>
+				</div>
+    						
+    			
+    			
+    			
+				
+    		</div>
+
+  		</div>
+	</div>
+    
+    
+      
+    
+    
+
+    {% endblock %}
+  </body>
+</html>
