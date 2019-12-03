@@ -1,9 +1,12 @@
+import matplotlib; matplotlib.use('agg')
+
 import random
 import matplotlib.pyplot as plt
 import numpy as np
 import pyfftw
 import math
 import time
+
 
 
 #GLOBAL VARIABLES
@@ -90,7 +93,8 @@ def simulate_recieve_signal(target_dists):
 		A = 1/R**2
 		v = A*10*rect((t - (T/2+td) )/T)*np.cos(2*np.pi*(f0*t+0.5*K*(t-td)**2)) #.+ generate_noise(t,A)
 		vt = vt + v
-
+	
+	vt =  vt + vt*random.random() *5
 	fft = pyfftw.builders.fft(vt) # compute fft
 	Vw = fft() 
 	
@@ -328,9 +332,9 @@ def plot_2D_image(z):
 	plt.plot(azm, r, color='k', ls='none') 
 	plt.colorbar()
 	#plt.grid()
-	plt.show(block=False)
+	#plt.show(block=False)
 	
-	
+	"""
 	# plot cross-section of z at fixed range
 	slice = [row[50] for row in z]
 	slice = np.array(slice, dtype=complex)
@@ -344,7 +348,15 @@ def plot_2D_image(z):
 	sliceplot2.set_xlabel("azimuth angle [rad]")
 	sliceplot2.set_ylabel("<z(theta)")
 	plt.show()
+	"""
 	
+	return fig
+	
+
+def generate_2D_image():
+	range_profiles = generate_all_range_profiles()
+	z = coherent_summing(range_profiles)
+	return plot_2D_image(z)
 
 if __name__ == "__main__":
 	
