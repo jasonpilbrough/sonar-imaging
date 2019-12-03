@@ -1,11 +1,14 @@
-from flask import Flask, render_template, request
+#import signal processing python script - NB this must be first for matplotlib to work
+import sys
+sys.path.append('../signal_processing')
+import sonar_processing as sp
 
+from flask import Flask, render_template, request
 import io
 import random
 from flask import Response
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-
 
 
 app = Flask(__name__)
@@ -28,7 +31,7 @@ def refresh():
 
 @app.route('/plot.png')
 def plot_png():
-    fig = create_figure()
+    fig = sp.generate_2D_image() # call signal processing routine
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')

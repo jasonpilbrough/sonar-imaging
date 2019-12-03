@@ -94,7 +94,7 @@ def simulate_recieve_signal(target_dists):
 		v = A*10*rect((t - (T/2+td) )/T)*np.cos(2*np.pi*(f0*t+0.5*K*(t-td)**2)) #.+ generate_noise(t,A)
 		vt = vt + v
 	
-	vt =  vt + vt*random.random() *5
+	vt =  vt + vt*random.random() *5 # only for testing purposes
 	fft = pyfftw.builders.fft(vt) # compute fft
 	Vw = fft() 
 	
