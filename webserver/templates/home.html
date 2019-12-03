@@ -9,15 +9,37 @@
     {% block content %}
 
     <h1> Processed Range Profile </h1>
-      
-    <form action="refresh">
-    	<button type="submit"> Refresh Plot </button>
-	<form>
-	
-	<div>
-      
-    <img src="/plot.png" alt="my plot">
     
+    <form>
+    	<button type="button" onclick="setTimeout(loadDoc, 0);clearInterval(cont)"> Refresh (single shot) </button>
+    	<button type="button" onclick="cont = setInterval(loadDoc, 1000)">Refresh (continuous)</button>
+		<button type="button" onclick="clearInterval(cont)">Stop</button>
+	<form>
+      
+    <div id=demo>
+    	<img id=temp src="/plot.png" alt="my plot">
+    </div>
+    
+
+	<script>
+	function loadDoc() {
+		
+  		var xhttp = new XMLHttpRequest();
+  		xhttp.onreadystatechange = function() {
+    	if (this.readyState == 4 && this.status == 200) {
+    		document.getElementById("temp").src = "plot.png";
+      		//document.getElementById("demo").innerHTML = this.responseText
+    	}
+  		};
+		xhttp.open("GET", "plot.png", true);
+  		xhttp.send();
+  		
+  		
+	}
+
+	</script>
+    
+
     {% endblock %}
   </body>
 </html>
