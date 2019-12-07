@@ -1,4 +1,7 @@
-import matplotlib; matplotlib.use('agg')
+import matplotlib; 
+
+# NB to plot in window comment out the following line, to plot in browser dont comment out
+matplotlib.use('agg')
 
 import random
 import matplotlib.pyplot as plt
@@ -47,7 +50,7 @@ else:   # case N odd
 # 2D GLOBAL VARIABLES
 global transmit_coord; transmit_coord = (0.0,0.0) # (x,y)
 global reciever_spacing; reciever_spacing = 0.01 # spacing between each of the recievers (in y axis)
-global reciever_coords; reciever_coords = [(0.0,-reciever_spacing*3),(0.0,-reciever_spacing*2),(0.0,-reciever_spacing*1),(0.0,0.0),(0.0,reciever_spacing*1),(0.0,reciever_spacing*2),(0.0,reciever_spacing*3)]
+global reciever_coords; reciever_coords = [(0.0,-reciever_spacing*4),(0.0,-reciever_spacing*3),(0.0,-reciever_spacing*2),(0.0,-reciever_spacing*1),(0.0,0.0),(0.0,reciever_spacing*1),(0.0,reciever_spacing*2),(0.0,reciever_spacing*3)]
 global target_coords; target_coords = [(5,0)]
 #global target_coords; target_coords = [(10, np.pi/12)]
 
@@ -321,18 +324,19 @@ def coherent_summing(range_profiles):
 
 
 def plot_2D_image(z):
-	fig = plt.figure()
+	fig = plt.figure(figsize=(12,8))
 	r, th = np.meshgrid(rad, azm)
 	ax = plt.subplot(projection="polar")
 	
-	ax.set_thetamin(45)
-	ax.set_thetamax(-45)
+	ax.set_thetamin(30)
+	ax.set_thetamax(-30)
 	
 	plt.pcolormesh(th, r, abs(z), cmap="inferno")
 	plt.plot(azm, r, color='k', ls='none') 
 	plt.colorbar()
 	#plt.grid()
-	#plt.show(block=False)
+	plt.subplots_adjust(left=0.0, right=1.0, top=0.95, bottom=0.05)
+	plt.show()
 	
 	"""
 	# plot cross-section of z at fixed range
@@ -359,6 +363,8 @@ def generate_2D_image():
 	return plot_2D_image(z)
 
 if __name__ == "__main__":
+
+	#matplotlib.use('MacOSX')
 	
 	start_time_millis = time.time()
 	start_time_fmt = time.strftime("%H:%M:%S", time.localtime())

@@ -6,8 +6,16 @@ function loadDoc() {
 		console.log(time-globaltime)
 		globaltime = time
 		
+		val = Math.random(); 
 		img = document.getElementById("mainplot");
-		img.src="plot.png?rand_number=" + Math.random(); // random number forces browser to reload image
+		img.src="plot.png?rand_number=" + val// random number forces browser to reload image
+		
+		/* TODO FIX 
+		img = document.getElementById("mainplot_zoom"); //zoomed in version
+		img.src="plot.png?rand_number=" + val; // same rand number = same image as above
+		*/
+		
+		
 		
 		/*
 		var time =  new Date();
