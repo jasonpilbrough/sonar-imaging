@@ -1,7 +1,7 @@
 import matplotlib; 
 
 # NB to plot in window comment out the following line, to plot in browser dont comment out
-matplotlib.use('agg')
+#matplotlib.use('agg')
 
 import random
 import matplotlib.pyplot as plt
@@ -50,12 +50,13 @@ else:   # case N odd
 # 2D GLOBAL VARIABLES
 global transmit_coord; transmit_coord = (0.0,0.0) # (x,y)
 global reciever_spacing; reciever_spacing = 0.01 # spacing between each of the recievers (in y axis)
-global reciever_coords; reciever_coords = [(0.0,-reciever_spacing*4),(0.0,-reciever_spacing*3),(0.0,-reciever_spacing*2),(0.0,-reciever_spacing*1),(0.0,0.0),(0.0,reciever_spacing*1),(0.0,reciever_spacing*2),(0.0,reciever_spacing*3)]
-global target_coords; target_coords = [(5,0)]
+global reciever_coords; reciever_coords = [(0.0,-reciever_spacing*4),(0.0,-reciever_spacing*3),(0.0,0.0-reciever_spacing*2),(0.0,-reciever_spacing*1),(0.0,0.0),(0.0,reciever_spacing*1),(0.0,reciever_spacing*2),(0.0,reciever_spacing*3)]
+#global target_coords; target_coords = [(5,0),(5,3),(5,-4),(7,0),(8,0.1)]
+global target_coords; target_coords = [(0,9)]
 #global target_coords; target_coords = [(10, np.pi/12)]
 
-global rad; rad = np.linspace(0, 10, 100)
-global azm; azm = np.linspace(-np.pi/4, np.pi/4, 100)
+global rad; rad = np.linspace(0, 10, 150)
+global azm; azm = np.linspace(-np.pi/4, np.pi/4, 150)
 
 
 
@@ -276,6 +277,7 @@ def generate_range_profile(dists_to_targets):
 	"""
 	
 	
+	
 	return yt
 	
 
@@ -285,7 +287,7 @@ def calc_dist(c1, c2):
 	return math.sqrt(diff[0]**2+diff[1]**2)
 
 
-def generate_all_range_profiles():
+def simulate_all_range_profiles():
 	# holds processed range profiles from each reciever
 	range_profiles = [] # np.zeros((len(reciever_coords),N))
 	for reciever in reciever_coords:
@@ -317,8 +319,19 @@ def coherent_summing(range_profiles):
 				
 				index = int(round(td * 0.5 / Δt))
 				value = range_profiles[n][index] * np.exp(2*1j*np.pi*fc*(td-tref))
+				"""
+				#print(rad[i],azm[j])
+				#print(rad[i], azm[j], rad[i]>=5.0 , rad[i]<=5.05 , azm[j] >= 0 , azm[j] <= 0.01)
+				if(rad[i]>=5.0 and rad[i]<=5.05 and azm[j] >= 0 and azm[j] <= 0.01):
+					print("5r","0deg",abs(value), np.angle(value)*180/np.pi)
+					
+				if(rad[i]>=5.0 and rad[i]<=5.05 and azm[j] >= 0.201 and azm[j] <= 0.211):
+					print("5r","11deg",abs(value), np.angle(value)*180/np.pi)
+					z[j][i] = z[j][i] + 0.02
+				"""
 				
 				z[j][i] = z[j][i] + value #NB must be [j][i] as later plot expects [angle, magnitude]
+				
 	
 	return z
 
@@ -328,13 +341,13 @@ def plot_2D_image(z):
 	r, th = np.meshgrid(rad, azm)
 	ax = plt.subplot(projection="polar")
 	
-	ax.set_thetamin(30)
-	ax.set_thetamax(-30)
+	ax.set_thetamin(30) # in degrees
+	ax.set_thetamax(-30) # in degrees
 	
 	plt.pcolormesh(th, r, abs(z), cmap="inferno")
 	plt.plot(azm, r, color='k', ls='none') 
 	plt.colorbar()
-	#plt.grid()
+	plt.grid()
 	plt.subplots_adjust(left=0.0, right=1.0, top=0.95, bottom=0.05)
 	plt.show()
 	
@@ -358,18 +371,17 @@ def plot_2D_image(z):
 	
 
 def generate_2D_image():
-	range_profiles = generate_all_range_profiles()
+	
+	range_profiles = simulate_all_range_profiles()
 	z = coherent_summing(range_profiles)
 	return plot_2D_image(z)
 
 if __name__ == "__main__":
-
-	#matplotlib.use('MacOSX')
 	
 	start_time_millis = time.time()
 	start_time_fmt = time.strftime("%H:%M:%S", time.localtime())
 	
-	range_profiles = generate_all_range_profiles()
+	range_profiles = simulate_all_range_profiles()
 	z = coherent_summing(range_profiles)
 	
 	end_time_millis = time.time()
