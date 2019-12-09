@@ -1,7 +1,7 @@
 import matplotlib; 
 
 # NB to plot in window comment out the following line, to plot in browser dont comment out
-#matplotlib.use('agg')
+# matplotlib.use('agg')
 
 import random
 import matplotlib.pyplot as plt
@@ -9,17 +9,18 @@ import numpy as np
 import pyfftw
 import math
 import time
+import teensy_interface
 
 
 
 #GLOBAL VARIABLES
 
 global c; c = 343			# speed of sound [meters/sec]
-global r_max; r_max = 15	# max range [meters]
+global r_max; r_max = 10	# max range [meters]
 
 global fc; fc = 40000		# center frequency of sonar [Hz]
 global T; T = 0.005			# length of chirp [seconds]
-global fs; fs = 100000		# sample rate [Hz]
+global fs; fs = 105000		# sample rate [Hz]
 
 global t_max; t_max = 2*r_max/c + T   # max range [seconds]
 global Δt; Δt = 1/fs		# sample spacing in time domain [seconds]
@@ -51,11 +52,11 @@ else:   # case N odd
 global transmit_coord; transmit_coord = (0.0,0.0) # (x,y)
 global reciever_spacing; reciever_spacing = 0.01 # spacing between each of the recievers (in y axis)
 global reciever_coords; reciever_coords = [(0.0,-reciever_spacing*4),(0.0,-reciever_spacing*3),(0.0,0.0-reciever_spacing*2),(0.0,-reciever_spacing*1),(0.0,0.0),(0.0,reciever_spacing*1),(0.0,reciever_spacing*2),(0.0,reciever_spacing*3)]
-#global target_coords; target_coords = [(5,0),(5,3),(5,-4),(7,0),(8,0.1)]
-global target_coords; target_coords = [(0,9)]
+global target_coords; target_coords = [(5,0),(5,3),(5,-4),(7,0),(8,0.1)]
+#global target_coords; target_coords = [(5,0)]
 #global target_coords; target_coords = [(10, np.pi/12)]
 
-global rad; rad = np.linspace(0, 10, 150)
+global rad; rad = np.linspace(0, r_max, 150)
 global azm; azm = np.linspace(-np.pi/4, np.pi/4, 150)
 
 
@@ -64,6 +65,33 @@ global azm; azm = np.linspace(-np.pi/4, np.pi/4, 150)
 # define rect function
 def rect(t):
 	return abs(t) < 0.5  * 1.0
+	
+
+def change_time_axis(new_sample_rate, num_samples):
+
+	global fs; fs = new_sample_rate		# sample rate [Hz]
+	global N; N = num_samples
+	
+	global Δt; Δt = 1/fs		# sample spacing in time domain [seconds]
+	global t_max;t_max = N*Δt   # max range [seconds]
+	global t; t = np.linspace(0, t_max,N)	# time axis
+
+	global s; s = 0.5 * t * c  	# distance axis
+	global s_max; s_max = 0.5 * t_max * c	# max range [meters]	
+
+	#init frequency axis
+	global Δω; Δω = 2*np.pi/(N*Δt) # Sample spacing in freq domain [rad]
+	global Δf; Δf = Δω/(2*np.pi)	# Sample spacing in freq domain [Hz]
+	global ω; ω = np.linspace(0, (N-1)*Δω, N)  # freq axis [rad]
+	global f; f = ω/(2*np.pi)		# freq axis [Hz]
+	global f_axis;
+	#create array of freq values stored in f_axis. First element maps to 0Hz
+	if N%2==0:    # case N even
+		f_axis =  np.linspace(-N/2, N/2-1, N)*Δf;
+	else:   # case N odd
+		f_axis = np.linspace(-(N-1)/2, (N-1)/2, N)*Δf;  
+	
+	print("fs=",fs,"Hz")
 
 
 # Define chirp pulse x(t) and return x(t)
@@ -85,20 +113,14 @@ def make_chirp():
 	plt.show()
 	"""
 	
+	
 	return xt , Xw
 
 
-# Simulate recieved echo from targets at distances that are passed as arguments
-def simulate_recieve_signal(target_dists):
-	vt = 0
-	for i in range(0,len(target_dists)):
-		R = target_dists[i]
-		td = 2*R/c
-		A = 1/R**2
-		v = A*10*rect((t - (T/2+td) )/T)*np.cos(2*np.pi*(f0*t+0.5*K*(t-td)**2)) #.+ generate_noise(t,A)
-		vt = vt + v
+# Prepare receive signal
+def prepare_recieve_signal(samples):
 	
-	vt =  vt + vt*random.random() *5 # only for testing purposes
+	vt = samples
 	fft = pyfftw.builders.fft(vt) # compute fft
 	Vw = fft() 
 	
@@ -107,22 +129,24 @@ def simulate_recieve_signal(target_dists):
 	fig, (tplot, fplot) = plt.subplots(2, 1)
 	#plt.title("recieved signal")
 	tplot.plot(t,vt,linewidth=0.7, color="#2da6f7")
+	#tplot.plot(t,np.ones(N)*0.058,linewidth=0.7, color="r")
 	tplot.set_xlabel("t [s]")
 	tplot.set_ylabel("v(t)")
 	fplot.plot(f_axis, np.fft.fftshift(abs(Vw)),linewidth=0.7, color="#2da6f7")
 	fplot.set_xlabel("f [Hz]")
 	fplot.set_ylabel("V(f)")
-	plt.show()
+	plt.show(block=False)
 	"""
 	
+	
 	return vt, Vw
-
+	
 
 # Perform pulse compression by passing signal through inverse filter
 def pulse_compression(Xw,Vw): #Xw input signal, Vw output signal
 
 	window = rect((f -fc % (N * Δf))/B)
-	Yw = Vw/Xw * (window + window[::-1]) # to account for the ='ve and -'ve freq
+	Yw = Vw/Xw * (window + window[::-1]) # to account for the +'ve and -'ve freq
 	Yw = np.nan_to_num(Yw) #replace any Nan with 0
 	
 	#Hw = np.conj(Xw) # conjugate of X.
@@ -166,8 +190,9 @@ def to_analytic_signal(Xw):
 	fplot.plot(f_axis, np.fft.fftshift(abs(Yw)),linewidth=0.7, color="#2da6f7")
 	fplot.set_xlabel("f [Hz]")
 	fplot.set_ylabel("Y(f)")
-	plt.show()
+	plt.show(block=False)
 	"""
+	
 	
 	return yt, Yw
 	
@@ -191,7 +216,7 @@ def apply_window_function(Xw, window_B, window_fc):
 	
 	"""
 	#plot y(t) and Y(f)
-	fig, (tplot, fplot) = plt.subplots(2, 1)
+	fig, (tplot, fplot, hplot) = plt.subplots(3, 1)
 	#plt.title("analytic output signal")
 	tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
 	tplot.set_xlabel("t [s]")
@@ -199,8 +224,12 @@ def apply_window_function(Xw, window_B, window_fc):
 	fplot.plot(f, abs(Yw),linewidth=0.7, color="#2da6f7")
 	fplot.set_xlabel("f [Hz]")
 	fplot.set_ylabel("Y(f)")
-	plt.show()
+	hplot.plot(f, abs(Hw),linewidth=0.7, color="#2da6f7")
+	hplot.set_xlabel("f [Hz]")
+	hplot.set_ylabel("H(f)")
+	plt.show(block=False)
 	"""
+	
 	
 	return yt, Yw
 
@@ -251,10 +280,10 @@ def range_compensation(xt):
 	
 	return yt, Yw
 
-
-def generate_range_profile(dists_to_targets):
+	
+def generate_range_profile(samples):
 	xt, Xw = make_chirp()
-	vt, Vw = simulate_recieve_signal(dists_to_targets)
+	vt, Vw = prepare_recieve_signal(np.asarray(samples)) #NB must convert to numpy array
 	yt, Yw = pulse_compression(Xw, Vw)
 	yt, Yw = to_analytic_signal(Yw)
 	yt, Yw = apply_window_function(Yw,2000,40000)
@@ -287,16 +316,11 @@ def calc_dist(c1, c2):
 	return math.sqrt(diff[0]**2+diff[1]**2)
 
 
-def simulate_all_range_profiles():
+def generate_all_range_profiles(dict):
 	# holds processed range profiles from each reciever
 	range_profiles = [] # np.zeros((len(reciever_coords),N))
-	for reciever in reciever_coords:
-		dists_to_targets = []
-		for target in target_coords:
-			#temp = (target[0]*np.cos(target[1]), target[0]*np.sin(target[1]))
-			temp = target
-			dists_to_targets.append(calc_dist(reciever, target))
-		range_profiles.append(generate_range_profile(dists_to_targets))
+	for reciever in dict:
+		range_profiles.append(generate_range_profile(dict[reciever]))
 	
 	return range_profiles
 
@@ -311,14 +335,26 @@ def coherent_summing(range_profiles):
 			
 			#distance between transmitter,  focus point, and reference point (0,0)
 			dref = calc_dist(transmit_coord, focus_point) + calc_dist(focus_point, (0,0))
-			tref = 2 * dref / c  # convert distance to time
 			
-			for n in range(0, len(reciever_coords)):
+			tref = 2 * dref / c  # convert distance to time
+			#tref = dref / c  # convert distance to time
+			
+			for n in range(0, len(reciever_coords)):				
+				
 				dist = calc_dist(transmit_coord, focus_point) + calc_dist(focus_point, reciever_coords[n])
 				td = 2 * dist / c
-				
 				index = int(round(td * 0.5 / Δt))
 				value = range_profiles[n][index] * np.exp(2*1j*np.pi*fc*(td-tref))
+				
+				"""
+				two_way_dist = calc_dist(transmit_coord, focus_point) + calc_dist(focus_point, reciever_coords[n])
+				two_way_td = two_way_dist / c 
+				index = int(round(two_way_td / Δt))
+				value = range_profiles[n][index] * np.exp(2*1j*np.pi*fc*(two_way_td/2-tref)) #NB dont think 2 should be here
+				"""
+                                
+				
+				
 				"""
 				#print(rad[i],azm[j])
 				#print(rad[i], azm[j], rad[i]>=5.0 , rad[i]<=5.05 , azm[j] >= 0 , azm[j] <= 0.01)
@@ -341,8 +377,17 @@ def plot_2D_image(z):
 	r, th = np.meshgrid(rad, azm)
 	ax = plt.subplot(projection="polar")
 	
-	ax.set_thetamin(30) # in degrees
-	ax.set_thetamax(-30) # in degrees
+	""" doesnt work
+	# change axis label colour
+	rlabels = ax.get_ymajorticklabels()
+	for label in rlabels:
+		label.set_color('white')
+		print("here")
+	"""
+	
+	
+	ax.set_thetamin(45) # in degrees
+	ax.set_thetamax(-45) # in degrees
 	
 	plt.pcolormesh(th, r, abs(z), cmap="inferno")
 	plt.plot(azm, r, color='k', ls='none') 
@@ -369,19 +414,114 @@ def plot_2D_image(z):
 	
 	return fig
 	
-
 def generate_2D_image():
+
+	teensy_interface.connect_to_Teensy()
+	teensy_interface.write_to_Teensy()
+	dict = teensy_interface.read_from_Teensy()
 	
-	range_profiles = simulate_all_range_profiles()
+	change_time_axis(dict.pop("sample_rate"),len(dict["buffer0"])) #NB must pop sample rate
+	
+	range_profiles = generate_all_range_profiles(dict)
 	z = coherent_summing(range_profiles)
 	return plot_2D_image(z)
 
+	
+	
+# ======================= functions for simulation mode ===========================
+
+# Simulate recieved echo from targets at distances that are passed as arguments
+def simulate_recieve_signal(two_way_delay_to_targets):
+	vt = 0
+	for i in range(0,len(two_way_delay_to_targets)):
+		#R = target_dists[i]
+		td = two_way_delay_to_targets[i]
+		R = 0.5 * td * c
+		A = 1/R**2
+		v = A*10*rect((t - (T/2+td) )/T)*np.cos(2*np.pi*(f0*t+0.5*K*(t-td)**2)) #.+ generate_noise(t,A)
+		vt = vt + v
+	
+	vt =  vt + vt*random.random() *5 # only for testing purposes
+	fft = pyfftw.builders.fft(vt) # compute fft
+	Vw = fft() 
+	
+	
+	#plot v(t) and V(f)
+	fig, (tplot, fplot) = plt.subplots(2, 1)
+	#plt.title("recieved signal")
+	tplot.plot(s,vt,linewidth=0.7, color="#2da6f7")
+	tplot.set_xlabel("t [s]")
+	tplot.set_ylabel("v(t)")
+	fplot.plot(f_axis, np.fft.fftshift(abs(Vw)),linewidth=0.7, color="#2da6f7")
+	fplot.set_xlabel("f [Hz]")
+	fplot.set_ylabel("V(f)")
+	plt.show(block=False)
+	
+	
+	return vt, Vw
+
+
+def generate_range_profile_sim(two_way_delay_to_targets):
+	xt, Xw = make_chirp()
+	vt, Vw = simulate_recieve_signal(two_way_delay_to_targets)
+	yt, Yw = pulse_compression(Xw, Vw)
+	yt, Yw = to_analytic_signal(Yw)
+	yt, Yw = apply_window_function(Yw,2000,40000)
+	yt, Yw = to_baseband(yt)
+	yt, Yw = range_compensation(yt)
+	
+	
+	"""
+	#plot y(t) and Y(f)
+	fig, (tplot, fplot) = plt.subplots(2, 1)
+	#plt.title("analytic output signal")
+	tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
+	tplot.set_xlabel("d [m]")
+	tplot.set_ylabel("{}".format("|y(t)|"))
+	#fplot.plot(f_axis, np.fft.fftshift(abs(Yw)),linewidth=0.7, color="#2da6f7")
+	fplot.plot(t, np.angle(yt),linewidth=0.7, color="#2da6f7")
+	fplot.set_xlabel("d [m]")
+	fplot.set_ylabel("<y(t)")
+	plt.show(block = True)
+	"""
+	
+	
+	return yt
+		
+
+def generate_all_range_profiles_sim():
+	# holds processed range profiles from each reciever
+	range_profiles = [] # np.zeros((len(reciever_coords),N))
+	for reciever in reciever_coords:
+		two_way_delay_to_targets = []
+		for target in target_coords:
+			#temp = (target[0]*np.cos(target[1]), target[0]*np.sin(target[1]))
+			temp = target
+			two_way_dist = calc_dist(transmit_coord, target)+calc_dist(target, reciever)
+			two_way_delay = two_way_dist/c
+			two_way_delay_to_targets.append(two_way_delay)
+		range_profiles.append(generate_range_profile_sim(two_way_delay_to_targets))
+	
+	return range_profiles
+	
+
+def generate_2D_image_sim():
+	
+	range_profiles = generate_all_range_profiles_sim()
+	z = coherent_summing(range_profiles)
+	return plot_2D_image(z)
+
+# ==============================================================================
+
+
+
 if __name__ == "__main__":
+	
 	
 	start_time_millis = time.time()
 	start_time_fmt = time.strftime("%H:%M:%S", time.localtime())
 	
-	range_profiles = simulate_all_range_profiles()
+	range_profiles = generate_all_range_profiles_sim()
 	z = coherent_summing(range_profiles)
 	
 	end_time_millis = time.time()
@@ -389,4 +529,29 @@ if __name__ == "__main__":
 	print("Runtime info: starttime={}, runtime={}s".format(start_time_fmt,round(runtime,2)))
 	
 	plot_2D_image(z)
+	
+	
+	"""
+	start_time_millis = time.time()
+	start_time_fmt = time.strftime("%H:%M:%S", time.localtime())
+	
+	teensy_interface.connect_to_Teensy()
+	teensy_interface.write_to_Teensy()
+	dict = teensy_interface.read_from_Teensy()
+	
+	change_time_axis(dict.pop("sample_rate"),len(dict["buffer0"])) #NB must pop sample rate
+	
+	range_profiles = generate_all_range_profiles(dict)
+	z = coherent_summing(range_profiles)
+	
+	end_time_millis = time.time()
+	runtime = end_time_millis - start_time_millis
+	print("Runtime info: starttime={}, runtime={}s".format(start_time_fmt,round(runtime,2)))
+	
+	plot_2D_image(z)
+	"""
+	
+	
+	
+	
 

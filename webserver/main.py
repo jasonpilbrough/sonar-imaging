@@ -31,7 +31,7 @@ def refresh():
 
 @app.route('/plot.png')
 def plot_png():
-    fig = sp.generate_2D_image() # call signal processing routine
+    fig = sp.generate_2D_image_sim() # call signal processing routine
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
@@ -47,3 +47,4 @@ def create_figure():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    #app.run(host='0.0.0.0')

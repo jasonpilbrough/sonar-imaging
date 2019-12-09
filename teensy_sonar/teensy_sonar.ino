@@ -64,6 +64,9 @@ void setup(){
   adc->setReference(ADC_REF,ADC_1); 
  
   delay(500);
+  read_all_pins_once(); //read all pins once during set up
+  clearBuffers();
+  delay(100);
   
 }
 
@@ -74,17 +77,77 @@ void loop() {
         char c = Serial.read();
         if(c=='s') { 
             Serial.println("ADC Speed test:");
-            speedTest();
+            Serial.print(speedTest()/1000.0);
+            Serial.println(" kHz");
         } else if(c=='a') { //enter a <space> <voltage in mV>
             Serial.println("ADC Accuracy test:");
             accuracyTest(Serial.parseInt()/1000.0); //convert to V
-        } 
+        } else if (c=='d'){
+          Serial.println("sample_rate");
+          Serial.println(speedTest());
+          clearBuffers();
+          read_all_pins_cont();
+          send_all_buffers();
+          //Serial.println(ADC_REF_VALUE*PIN0_VALUES[0]/(adc->getMaxValue()),4);
+          clearBuffers();
+        }
     }
 
     // Print errors, if any.
     adc->printError();
     delay(100);
 
+}
+
+void read_all_pins_cont(){
+
+  for(int i =0; i< 6200; i++){
+     read_all_pins_once();
+  }
+  
+}
+
+void send_all_buffers(){
+
+  Serial.println("start_buffer_transfer");
+  Serial.println("buffer0");
+  for(uint32_t i =0; i< ARR_COUNTER; i++){
+     Serial.println(convertCodeToVoltage(PIN0_VALUES[i]),4);
+  }
+  Serial.println("buffer1");
+  for(uint32_t i =0; i< ARR_COUNTER; i++){
+     Serial.println(convertCodeToVoltage(PIN1_VALUES[i]),4);
+  }
+  Serial.println("buffer2");
+  for(uint32_t i =0; i< ARR_COUNTER; i++){
+     Serial.println(convertCodeToVoltage(PIN2_VALUES[i]),4);
+  }
+  Serial.println("buffer3");
+  for(uint32_t i =0; i< ARR_COUNTER; i++){
+     Serial.println(convertCodeToVoltage(PIN3_VALUES[i]),4);
+  }
+  Serial.println("buffer4");
+  for(uint32_t i =0; i< ARR_COUNTER; i++){
+     Serial.println(convertCodeToVoltage(PIN4_VALUES[i]),4);
+  }
+  Serial.println("buffer5");
+  for(uint32_t i =0; i< ARR_COUNTER; i++){
+     Serial.println(convertCodeToVoltage(PIN5_VALUES[i]),4);
+  }
+  Serial.println("buffer6");
+  for(uint32_t i =0; i< ARR_COUNTER; i++){
+     Serial.println(convertCodeToVoltage(PIN6_VALUES[i]),4);
+  }
+  Serial.println("buffer7");
+  for(uint32_t i =0; i< ARR_COUNTER; i++){
+     Serial.println(convertCodeToVoltage(PIN7_VALUES[i]),4);
+  }
+  Serial.println("end_buffer_transfer");
+  
+}
+
+double convertCodeToVoltage(uint16_t value){
+  return ADC_REF_VALUE*value/(adc->getMaxValue());
 }
 
 
@@ -96,7 +159,7 @@ void read_all_pins_once(){
     adc->startSynchronizedSingleRead(READ_PIN1, READ_PIN5); //NB the order of this command is important
     PIN0_VALUES[ARR_COUNTER] = (uint16_t)(res.result_adc0);
     PIN4_VALUES[ARR_COUNTER] = (uint16_t)(res.result_adc1);
-    
+
     while(!adc->isComplete()){ } 
     res = adc->readSynchronizedSingle();
     adc->startSynchronizedSingleRead(READ_PIN2, READ_PIN6); //NB the order of this command is important
@@ -113,6 +176,8 @@ void read_all_pins_once(){
     res = adc->readSynchronizedSingle(); 
     PIN3_VALUES[ARR_COUNTER] = (uint16_t)(res.result_adc0);
     PIN7_VALUES[ARR_COUNTER] = (uint16_t)(res.result_adc1);
+ 
+
  
     ARR_COUNTER++;
     
@@ -134,7 +199,7 @@ void read_all_pins_once(){
   
  }
 
- void speedTest(){
+ double speedTest(){
 
     int starttime = micros();
     double num_iterations = 100.0; //must be a double
@@ -146,17 +211,16 @@ void read_all_pins_once(){
     double period_us = (micros()-starttime)/(num_iterations);
     double period_s =period_us/1000000.0;
     double freq_hz = 1/period_s;
-    double freq_khz = freq_hz/1000.0;
 
-    Serial.print(freq_khz);
-    Serial.println(" kHz");
+
+    return freq_hz;
 
  }
 
  void accuracyTest(double trueValue){
 
     double errorSquared[8];
-    double num_iterations = 1000.0; //must be a double
+    double num_iterations = 10000.0; //must be a double
 
     delay(500);
     for(int i = 0; i< num_iterations; i++){    
