@@ -1,5 +1,6 @@
 #include <ADC.h>
 #include <math.h>
+#include "chirp_signal.h"
 
 //ADC AND PARAMS
 ADC *adc = new ADC(); // adc object
@@ -34,6 +35,16 @@ uint16_t PIN6_VALUES[10000];
 uint16_t PIN7_VALUES[10000];
 
 
+// VARIABLES FOR THE DAC
+IntervalTimer MY_TIMER; // Create an IntervalTimer object 
+double TIMER_DELAY = 1/CHIRP_SAMPLE_RATE * 1000000; //timer delay in microseconds
+volatile bool TIMER_RUNNING;
+volatile unsigned long OUTPUT_COUNTER = 0; // use volatile for shared variables
+
+//OUPUT PINS
+const int OUTPUT_PIN = 13;  // pin connected to transmitter
+
+
 void setup(){
 
   //configure all input pins to input mode
@@ -45,6 +56,9 @@ void setup(){
   pinMode(READ_PIN5, INPUT);
   pinMode(READ_PIN6, INPUT);
   pinMode(READ_PIN7, INPUT);
+
+  //configure output pins   
+  pinMode(OUTPUT_PIN, OUTPUT);
     
   //ADC0
   adc->setAveraging(ADC_AVERAGING, ADC_0); // set number of averages
@@ -77,19 +91,30 @@ void loop() {
         char c = Serial.read();
         if(c=='s') { 
             Serial.println("ADC Speed test:");
-            Serial.print(speedTest()/1000.0);
+            Serial.print(ADC_speedTest()/1000.0);
             Serial.println(" kHz");
         } else if(c=='a') { //enter a <space> <voltage in mV>
             Serial.println("ADC Accuracy test:");
-            accuracyTest(Serial.parseInt()/1000.0); //convert to V
+            ADC_accuracyTest(Serial.parseInt()/1000.0); //convert to V
         } else if (c=='d'){
-          Serial.println("sample_rate");
-          Serial.println(speedTest());
-          clearBuffers();
-          read_all_pins_cont();
-          send_all_buffers();
-          //Serial.println(ADC_REF_VALUE*PIN0_VALUES[0]/(adc->getMaxValue()),4);
-          clearBuffers();
+            Serial.println("sample_rate");
+            Serial.println(ADC_speedTest());
+            clearBuffers();
+            read_all_pins_cont();
+            send_all_buffers();
+            //Serial.println(ADC_REF_VALUE*PIN0_VALUES[0]/(adc->getMaxValue()),4);
+            clearBuffers();
+        } else if (c=='w'){
+            Serial.println("Writing to DAC");
+            OUTPUT_COUNTER = 0;
+            outputToDac(TIMER_DELAY);
+        } else if (c=='z'){
+            Serial.println("Speed Test - Writing to DAC: ");
+            OUTPUT_COUNTER = 0;          
+            double period_us = DAC_speedTest(TIMER_DELAY);
+            Serial.print(period_us,3);
+            Serial.println(" us");
+      
         }
     }
 
@@ -97,6 +122,43 @@ void loop() {
     adc->printError();
     delay(100);
 
+}
+
+
+void write_to_DAC(){
+
+    int starttime = micros();
+    double num_iterations = 100.0; //must be a double
+
+    // for 40kHz total delay should be 25us
+    // each analogWrite() takes 0.49us
+    // each delay 12us = 40.0 kHz
+    // each delay 11us = 43.4 kHz
+
+    
+    for(uint32_t i = 0; i < num_iterations; i++){
+
+        for(uint32_t j = 0; j < 26; j++){
+          analogWrite(A21, 0xfff); //takes 0.49us
+        }
+        for(uint32_t j = 0; j < 26; j++){
+          analogWrite(A21, 0x0); //takes 0.49us
+        }
+        
+        //analogWrite(A21, 0x0); //takes 0.49us
+        //delayMicroseconds(11);
+        //analogWrite(A21, 0xfff); //takes 0.49us
+        //delayMicroseconds(11);
+        //digitalWrite(A21, HIGH);
+    } 
+
+    double period_us = (micros()-starttime)/(num_iterations);
+    double period_s =period_us/1000000.0;
+    double freq_hz = 1/period_s;
+    Serial.print(freq_hz);
+    Serial.println(" Hz");
+    //Serial.print(period_us);
+    //Serial.println(" us");
 }
 
 void read_all_pins_cont(){
@@ -199,7 +261,47 @@ void read_all_pins_once(){
   
  }
 
- double speedTest(){
+ 
+// this function should run as fast as possible
+void DAC_timerInterupt() {
+
+  if(OUTPUT_COUNTER>NUM_SAMPLES){
+     MY_TIMER.end();
+     TIMER_RUNNING =false;
+     return;
+  }
+  
+  digitalWrite(OUTPUT_PIN, waveformLookup[OUTPUT_COUNTER]);
+  OUTPUT_COUNTER = OUTPUT_COUNTER + 1; 
+  
+}
+
+void outputToDac(double microSecDelay){
+  
+    TIMER_RUNNING = true;
+    MY_TIMER.begin(DAC_timerInterupt, microSecDelay); 
+    while(TIMER_RUNNING){}  
+    
+}
+
+double DAC_speedTest(double microSecDelay){
+
+    TIMER_RUNNING = true;
+    MY_TIMER.begin(DAC_timerInterupt, microSecDelay); 
+    int starttime = micros();
+ 
+    while(TIMER_RUNNING){}
+
+    double period_us = (micros()-starttime);
+    return period_us;
+
+}
+
+
+
+ 
+
+ double ADC_speedTest(){
 
     int starttime = micros();
     double num_iterations = 100.0; //must be a double
@@ -217,7 +319,7 @@ void read_all_pins_once(){
 
  }
 
- void accuracyTest(double trueValue){
+ void ADC_accuracyTest(double trueValue){
 
     double errorSquared[8];
     double num_iterations = 10000.0; //must be a double
@@ -269,7 +371,7 @@ void read_all_pins_once(){
         Serial.print(tempValue,3);
         Serial.println("");
     }
-    Serial.println("Error");
+    Serial.println("Error Stats");
     Serial.println("---------------------------------------------");
     
     
