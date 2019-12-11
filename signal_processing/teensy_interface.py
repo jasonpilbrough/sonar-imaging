@@ -33,24 +33,57 @@ def connect_to_Teensy():
 	try:
 		SERIAL = serial.Serial(TEENSY_DEVICE, BAUD_RATE, timeout = 1)
 	except Exception as e:
-		print("Cant connect to device")
+		print("Cant connect to device", end=" ")
 		print(e);
 	
-	
 
-def write_to_Teensy():
-	SERIAL.write(str("d").encode())
-	
 
-def read_from_Teensy():
-	#print(SERIAL.read(1000000).decode('ascii'))
-	
-	samples = SERIAL.read(1000000).decode('ascii').split("\n") # new line means new reading
-	
+def request_info_data():
 	
 	dict = {}
 	
 	try:
+		connect_to_Teensy()
+		# send command to teensy to return info data
+		SERIAL.write(str("i").encode())
+		# retrieve data
+		info = SERIAL.read(100).decode('ascii').split("\n") # new line means new reading
+	
+		
+		
+		if("sample_rate" not in info[0]):
+			raise FormatError(info[0], "input does not contain string 'sample_rate'")
+		
+		dict["connection"] = "Connected"
+		dict["sample_rate"] = "{} kHz".format(round(float(info[1].replace("\r",""))/1000.0,2))
+		
+	except (NameError, serial.serialutil.SerialException) as e1:
+		print(e1)
+		dict["connection"] = "Not Connected"
+		dict["sample_rate"] = "N/A"
+	except FormatError as e2:
+		print("format from teensy not recongised", end=" ")
+		print(e2)
+		
+	#print(dict)
+	
+	return dict
+
+
+
+def request_sonar_data():
+
+	dict = {} # if an error occurs an empty dict is returned
+	
+	try:
+		connect_to_Teensy();
+		# send command to teensy to transmit chirp and return sampled echos
+		SERIAL.write(str("f").encode())
+		# retrieve data
+		samples = SERIAL.read(1000000).decode('ascii').split("\n") # new line means new reading
+
+		
+		
 		if("sample_rate" not in samples[0]):
 			raise FormatError(samples[0], "input does not contain string 'sample_rate'")
 		
@@ -74,34 +107,25 @@ def read_from_Teensy():
 				dict[current_buffer].append(float(samples[counter].replace("\r",""))) # remove \r
 			counter=counter+1
 		
-		
-			
-	
-	except FormatError as e:
-		print("format from teensy not recongised")
-		print(e)
+	except (NameError,serial.serialutil.SerialException) as e1:
+		print(e1)
+	except FormatError as e2:
+		print("format from teensy not recongised", end=" ")
+		print(e2)
 	
 	#print(dict)
 	
 	return dict
-	
-	
 
-
-readOut = 0   #chars waiting from laser range finder
-connected = False
-commandToSend = 1 # get the distance in mm
 
 
 if __name__ == "__main__":
 	print ("Searching for ports...")
 	list_serial_devices();
-	print ("Connecting to Teensy")
-	connect_to_Teensy()
-	print ("Writing to Teensy")
-	write_to_Teensy()
-	print ("Reading from Teensy")
-	read_from_Teensy()
+	print ("Requesting info data from Teensy")
+	request_info_data()
+	print ("Requesting sonar data from Teensy")
+	request_sonar_data()
 
 
 

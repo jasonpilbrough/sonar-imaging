@@ -24,7 +24,8 @@
     			<div class="row">
     				<div class="col-12">
     					
-    					<img id=mainplot class="figure-img img-fluid rounded" src="/plot.png" alt="my plot" >	
+    					<!-- placeholder image--!>
+    					<img id=mainplot class="figure-img img-fluid rounded" src="https://dummyimage.com/670x486.662/054846/fff.png&text=[press+run+to+generate+image]" alt=" [could not load image]" >	
     					
     					<!-- <img id=mainplot class="figure-img img-fluid rounded" src="/plot.png" alt="my plot" width="1000" height="1000"> --!>
       				</div>
@@ -51,15 +52,7 @@
 							Current State
 						</div>
 						<div class="col-6">
-							<span class="badge badge-secondary badge-pill">Idle</span>
-						</div>
-					</div>
-					<div class="row">
-    					<div class="col-6">
-							Microcontroller
-						</div>
-						<div class="col-6">
-							<span class="badge badge-danger badge-pill">Not Connected</span>
+							<span id="label_current_state" class="badge badge-secondary badge-pill">Idle</span>
 						</div>
 					</div>
 					<div class="row">
@@ -67,10 +60,17 @@
 							Internet
 						</div>
 						<div class="col-6">
-							<span class="badge badge-success badge-pill">Connected</span>
+							<span id="label_internet_connection" class="badge badge-success badge-pill"> Connected </span>
 						</div>
 					</div>
-					
+					<div class="row">
+    					<div class="col-6">
+							Microcontroller
+						</div>
+						<div class="col-6">
+							<span id="label_micro_connection" class="badge badge-danger badge-pill">Not Connected</span>
+						</div>
+					</div>
 					<div class="row">
     					<div class="col-6">
 							Battery Level
@@ -84,7 +84,7 @@
 							Sampling Rate
 						</div>
 						<div class="col-6">
-							<span class="badge badge-info badge-pill">104.12kHz</span>
+							<span id="label_sample_rate" class="badge badge-info badge-pill">N/A</span>
 						</div>
 					</div>
 					<div class="row">
@@ -92,7 +92,7 @@
 							Refresh Rate
 						</div>
 						<div class="col-6">
-							<span class="badge badge-secondary badge-pill">N/A</span>
+							<span id="label_refresh_rate" class="badge badge-secondary badge-pill">N/A</span>
 						</div>
 					</div>
 				</div>
@@ -101,14 +101,11 @@
     					<h5> Controls </h5>
 					</div>
 					<div class="row">
-						<div class="col-4">
-							<button type="button" class="btn btn-outline-info btn-block" onclick="setTimeout(loadDoc, 0)"> Run (s) </button>
+						<div class="col-6">
+							<button id="btn_run" type="button" class="btn btn-outline-info btn-block"> Run </button>
 						</div>
-						<div class="col-4">
-							<button type="button" class="btn btn-outline-info btn-block "onclick="cont = setInterval(loadDoc, 2000)">Run (c)</button>
-						</div>
-						<div class="col-4">
-							<button type="button" class="btn btn-outline-danger btn-block" onclick="clearInterval(cont)">Stop</button>
+						<div class="col-6">
+							<button id="btn_stop" type="button" class="btn btn-outline-danger btn-block"> Stop </button>
 						</div>
 					</div>
 				</div>
@@ -117,51 +114,61 @@
     					<h5> Configuration </h5>
 					</div>
 					<div class="row">
-						<div class="col-5">
+						<div class="col-6">
 							Imaging Mode
 						</div>
-						<div class="col-7">
+						<div class="col-6">
       						<div class="btn-group btn-group-toggle" data-toggle="buttons">
   								<label class="btn btn-info active btn-sm">
-   									 <input type="radio" name="options" id="option1" checked> Single
+   									 <input type="radio" name="radio_imaging_mode" id="option1" checked> Single
   								</label>
   								<label class="btn btn-info btn-sm">
-    								<input type="radio" name="options" id="option2"> Continuous
+    								<input type="radio" name="radio_imaging_mode" id="option2"> Continuous
   								</label>
   							</div>
 						</div>
 					</div>
 					
 					<div class="row mt-1">
-      					<div class="col-5">
+      					<div class="col-6">
 							Display Mode
 						</div>
-						<div class="col-7">
+						<div class="col-6">
       						<div class="btn-group btn-group-toggle" data-toggle="buttons">
   								<label class="btn btn-info active btn-sm">
-   									 <input type="radio" name="options" id="option1" checked> 1D
+   									 <input type="radio" name="radio_display_mode" id="option1" checked> 1D
   								</label>
   								<label class="btn btn-info btn-sm">
-    								<input type="radio" name="options" id="option2"> 2D
+    								<input type="radio" name="radio_display_mode" id="option2"> 2D
   								</label>
   							</div>
 						</div>
 					</div>
 					<div class="row mt-1">
-						<div class="col-5">
+						<div class="col-6">
+							Simulation Mode
+						</div>
+						<div class="col-6">
+      						<div class="form-check">
+  								<input id="chk_sim_mode" class="form-check-input" type="checkbox" value="" id="defaultCheck3">
+							</div>
+						</div>
+					</div>
+					<div class="row mt-1">
+						<div class="col-6">
 							Range Comp.
 						</div>
-						<div class="col-7">
+						<div class="col-6">
       						<div class="form-check">
   								<input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
 							</div>
 						</div>
 					</div>
 					<div class="row mt-1">
-						<div class="col-5">
+						<div class="col-6">
 							Debug Mode
 						</div>
-						<div class="col-7">
+						<div class="col-6">
       						<div class="form-check">
   								<input class="form-check-input" type="checkbox" value="" id="defaultCheck2">
   							</div>
@@ -190,7 +197,7 @@
         </div>
      
       <div class="modal-body">
-        <img id=mainplot_zoom class="figure-img img-fluid rounded mx-auto d-block" src="/plot.png" alt="my plot" width="1000" height="1000">
+        <img id=mainplot_zoom class="figure-img img-fluid rounded mx-auto d-block" src="https://dummyimage.com/670x486.662/054846/fff.png&text=[press+run+to+generate+image]" alt="my plot" width="1000" height="1000">
       </div>
       
     </div>

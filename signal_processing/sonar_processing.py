@@ -1,7 +1,7 @@
 import matplotlib; 
 
 # NB to plot in window comment out the following line, to plot in browser dont comment out
-# matplotlib.use('agg')
+matplotlib.use('agg')
 
 import random
 import matplotlib.pyplot as plt
@@ -91,7 +91,7 @@ def change_time_axis(new_sample_rate, num_samples):
 	else:   # case N odd
 		f_axis = np.linspace(-(N-1)/2, (N-1)/2, N)*Δf;  
 	
-	print("fs=",fs,"Hz")
+	#print("fs=",fs,"Hz")
 
 
 # Define chirp pulse x(t) and return x(t)
@@ -352,9 +352,7 @@ def coherent_summing(range_profiles):
 				index = int(round(two_way_td / Δt))
 				value = range_profiles[n][index] * np.exp(2*1j*np.pi*fc*(two_way_td/2-tref)) #NB dont think 2 should be here
 				"""
-                                
-				
-				
+                                	
 				"""
 				#print(rad[i],azm[j])
 				#print(rad[i], azm[j], rad[i]>=5.0 , rad[i]<=5.05 , azm[j] >= 0 , azm[j] <= 0.01)
@@ -414,11 +412,37 @@ def plot_2D_image(z):
 	
 	return fig
 	
+def generate_1D_image():
+
+	dict = teensy_interface.request_sonar_data()
+	
+	# could not connect to teensy - return empty figure
+	if(len(dict)==0):
+		raise teensy_interface.FormatError("","error from microcontroller")
+		
+	
+	change_time_axis(dict.pop("sample_rate"),len(dict["buffer0"])) #NB must pop sample rate
+	
+	yt = generate_range_profile(dict["buffer0"]) # use buffer 0 
+
+	#plot y(t) 
+	fig, (splot) = plt.subplots(1, 1)
+	splot.plot(s,abs(yt),linewidth=0.7, color="#2da6f7")
+	splot.set_xlabel("d [m]")
+	splot.set_ylabel("{}".format("|y(t)|"))
+	plt.show()
+
+	return fig
+	
+
 def generate_2D_image():
 
-	teensy_interface.connect_to_Teensy()
-	teensy_interface.write_to_Teensy()
-	dict = teensy_interface.read_from_Teensy()
+	dict = teensy_interface.request_sonar_data()
+	
+	# could not connect to teensy - return empty figure
+	if(len(dict)==0):
+		raise teensy_interface.FormatError("","error from microcontroller")
+	
 	
 	change_time_axis(dict.pop("sample_rate"),len(dict["buffer0"])) #NB must pop sample rate
 	
@@ -445,7 +469,7 @@ def simulate_recieve_signal(two_way_delay_to_targets):
 	fft = pyfftw.builders.fft(vt) # compute fft
 	Vw = fft() 
 	
-	
+	"""
 	#plot v(t) and V(f)
 	fig, (tplot, fplot) = plt.subplots(2, 1)
 	#plt.title("recieved signal")
@@ -456,6 +480,7 @@ def simulate_recieve_signal(two_way_delay_to_targets):
 	fplot.set_xlabel("f [Hz]")
 	fplot.set_ylabel("V(f)")
 	plt.show(block=False)
+	"""
 	
 	
 	return vt, Vw
@@ -503,7 +528,27 @@ def generate_all_range_profiles_sim():
 		range_profiles.append(generate_range_profile_sim(two_way_delay_to_targets))
 	
 	return range_profiles
+
+
+def generate_1D_image_sim():
+
+	two_way_delay_to_targets = []
 	
+	for target in target_coords:
+		two_way_dist = calc_dist(transmit_coord, target)+calc_dist(target, reciever_coords[0])			
+		two_way_delay = two_way_dist/c
+		two_way_delay_to_targets.append(two_way_delay)
+		
+	yt = generate_range_profile_sim(two_way_delay_to_targets)
+		
+	#plot y(t) 
+	fig, (splot) = plt.subplots(1, 1)
+	splot.plot(s,abs(yt),linewidth=0.7, color="#2da6f7")
+	splot.set_xlabel("d [m]")
+	splot.set_ylabel("{}".format("|y(t)|"))
+	#plt.show()
+
+	return fig
 
 def generate_2D_image_sim():
 	
@@ -531,13 +576,12 @@ if __name__ == "__main__":
 	plot_2D_image(z)
 	
 	
+	
 	"""
 	start_time_millis = time.time()
 	start_time_fmt = time.strftime("%H:%M:%S", time.localtime())
 	
-	teensy_interface.connect_to_Teensy()
-	teensy_interface.write_to_Teensy()
-	dict = teensy_interface.read_from_Teensy()
+	dict = teensy_interface.request_sonar_data()
 	
 	change_time_axis(dict.pop("sample_rate"),len(dict["buffer0"])) #NB must pop sample rate
 	
@@ -549,6 +593,10 @@ if __name__ == "__main__":
 	print("Runtime info: starttime={}, runtime={}s".format(start_time_fmt,round(runtime,2)))
 	
 	plot_2D_image(z)
+	"""
+	
+	"""
+	generate_1D_image();
 	"""
 	
 	

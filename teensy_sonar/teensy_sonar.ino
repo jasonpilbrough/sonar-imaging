@@ -87,35 +87,56 @@ void setup(){
 
 void loop() {
 
+/* The following command characters are accepted:
+
+   i - info mode: confirm micro is connected and send ADC sample rate on Serial
+   f - full op mode: transmit chirp, sample return on 8 channels, send ADC speed and 8 buffers on Serial
+
+   s - speed ADC: print ADC sample speed to Serial
+   t - speed DAC: print DAC sample speed to Serial
+   a <true value in mV> - accuracy ADC: print ADC accuracy measure to Serial
+   o - DAC out: output chirp using DAC (no ADC)
+  
+*/
+    
     if (Serial.available()) {
         char c = Serial.read();
-        if(c=='s') { 
-            Serial.println("ADC Speed test:");
-            Serial.print(ADC_speedTest()/1000.0);
-            Serial.println(" kHz");
-        } else if(c=='a') { //enter a <space> <voltage in mV>
-            Serial.println("ADC Accuracy test:");
-            ADC_accuracyTest(Serial.parseInt()/1000.0); //convert to V
-        } else if (c=='d'){
+
+        if(c=='i') { 
+            Serial.println("sample_rate");
+            Serial.println(ADC_speedTest());
+
+        } else if (c=='f'){
             Serial.println("sample_rate");
             Serial.println(ADC_speedTest());
             clearBuffers();
+            
+            OUTPUT_COUNTER = 0;
+            outputToDac(TIMER_DELAY);
+            
             read_all_pins_cont();
             send_all_buffers();
             //Serial.println(ADC_REF_VALUE*PIN0_VALUES[0]/(adc->getMaxValue()),4);
             clearBuffers();
-        } else if (c=='w'){
-            Serial.println("Writing to DAC");
-            OUTPUT_COUNTER = 0;
-            outputToDac(TIMER_DELAY);
-        } else if (c=='z'){
+        } else if(c=='s') { 
+            Serial.println("ADC Speed test:");
+            Serial.print(ADC_speedTest()/1000.0);
+            Serial.println(" kHz");
+        } else if (c=='t'){
             Serial.println("Speed Test - Writing to DAC: ");
             OUTPUT_COUNTER = 0;          
             double period_us = DAC_speedTest(TIMER_DELAY);
             Serial.print(period_us,3);
             Serial.println(" us");
-      
-        }
+        } else if(c=='a') { //enter a <space> <voltage in mV>
+            Serial.println("ADC Accuracy test:");
+            ADC_accuracyTest(Serial.parseInt()/1000.0); //convert to V
+        } else if (c=='o'){
+            Serial.println("Writing to DAC");
+            OUTPUT_COUNTER = 0;
+            outputToDac(TIMER_DELAY);
+        }       
+           
     }
 
     // Print errors, if any.
@@ -124,42 +145,6 @@ void loop() {
 
 }
 
-
-void write_to_DAC(){
-
-    int starttime = micros();
-    double num_iterations = 100.0; //must be a double
-
-    // for 40kHz total delay should be 25us
-    // each analogWrite() takes 0.49us
-    // each delay 12us = 40.0 kHz
-    // each delay 11us = 43.4 kHz
-
-    
-    for(uint32_t i = 0; i < num_iterations; i++){
-
-        for(uint32_t j = 0; j < 26; j++){
-          analogWrite(A21, 0xfff); //takes 0.49us
-        }
-        for(uint32_t j = 0; j < 26; j++){
-          analogWrite(A21, 0x0); //takes 0.49us
-        }
-        
-        //analogWrite(A21, 0x0); //takes 0.49us
-        //delayMicroseconds(11);
-        //analogWrite(A21, 0xfff); //takes 0.49us
-        //delayMicroseconds(11);
-        //digitalWrite(A21, HIGH);
-    } 
-
-    double period_us = (micros()-starttime)/(num_iterations);
-    double period_s =period_us/1000000.0;
-    double freq_hz = 1/period_s;
-    Serial.print(freq_hz);
-    Serial.println(" Hz");
-    //Serial.print(period_us);
-    //Serial.println(" us");
-}
 
 void read_all_pins_cont(){
 
