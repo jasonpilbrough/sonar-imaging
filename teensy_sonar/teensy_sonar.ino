@@ -107,6 +107,7 @@ void loop() {
             Serial.println(ADC_speedTest());
 
         } else if (c=='f'){
+            int starttime = micros();
             Serial.println("sample_rate");
             Serial.println(ADC_speedTest());
             clearBuffers();
@@ -118,6 +119,10 @@ void loop() {
             send_all_buffers();
             //Serial.println(ADC_REF_VALUE*PIN0_VALUES[0]/(adc->getMaxValue()),4);
             clearBuffers();
+            Serial.print("Runtime: ");
+            Serial.print(micros()-starttime);
+            Serial.println(" us");
+            
         } else if(c=='s') { 
             Serial.println("ADC Speed test:");
             Serial.print(ADC_speedTest()/1000.0);
@@ -159,35 +164,35 @@ void send_all_buffers(){
   Serial.println("start_buffer_transfer");
   Serial.println("buffer0");
   for(uint32_t i =0; i< ARR_COUNTER; i++){
-     Serial.println(convertCodeToVoltage(PIN0_VALUES[i]),4);
+     Serial.println(PIN0_VALUES[i]);
   }
   Serial.println("buffer1");
   for(uint32_t i =0; i< ARR_COUNTER; i++){
-     Serial.println(convertCodeToVoltage(PIN1_VALUES[i]),4);
+     Serial.println(PIN1_VALUES[i]);
   }
   Serial.println("buffer2");
   for(uint32_t i =0; i< ARR_COUNTER; i++){
-     Serial.println(convertCodeToVoltage(PIN2_VALUES[i]),4);
+     Serial.println(PIN2_VALUES[i]);
   }
   Serial.println("buffer3");
   for(uint32_t i =0; i< ARR_COUNTER; i++){
-     Serial.println(convertCodeToVoltage(PIN3_VALUES[i]),4);
+     Serial.println(PIN3_VALUES[i]);
   }
   Serial.println("buffer4");
   for(uint32_t i =0; i< ARR_COUNTER; i++){
-     Serial.println(convertCodeToVoltage(PIN4_VALUES[i]),4);
+     Serial.println(PIN4_VALUES[i]);
   }
   Serial.println("buffer5");
   for(uint32_t i =0; i< ARR_COUNTER; i++){
-     Serial.println(convertCodeToVoltage(PIN5_VALUES[i]),4);
+     Serial.println(PIN5_VALUES[i]);
   }
   Serial.println("buffer6");
   for(uint32_t i =0; i< ARR_COUNTER; i++){
-     Serial.println(convertCodeToVoltage(PIN6_VALUES[i]),4);
+     Serial.println(PIN6_VALUES[i]);
   }
   Serial.println("buffer7");
   for(uint32_t i =0; i< ARR_COUNTER; i++){
-     Serial.println(convertCodeToVoltage(PIN7_VALUES[i]),4);
+     Serial.println(PIN7_VALUES[i]);
   }
   Serial.println("end_buffer_transfer");
   

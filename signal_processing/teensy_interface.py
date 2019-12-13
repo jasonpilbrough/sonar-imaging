@@ -31,7 +31,7 @@ def list_serial_devices():
 def connect_to_Teensy():
 	global SERIAL;
 	try:
-		SERIAL = serial.Serial(TEENSY_DEVICE, BAUD_RATE, timeout = 1)
+		SERIAL = serial.Serial(TEENSY_DEVICE, BAUD_RATE, timeout = 0.35)
 	except Exception as e:
 		print("Cant connect to device", end=" ")
 		print(e);
@@ -79,9 +79,15 @@ def request_sonar_data():
 		connect_to_Teensy();
 		# send command to teensy to transmit chirp and return sampled echos
 		SERIAL.write(str("f").encode())
+
+		#while SERIAL.in_waiting:  # Or: while ser.inWaiting():
+		#	samples[tempCount] = SERIAL.readline().decode('ascii').replace("\n","")
+		
+		#print(samples)
+		
 		# retrieve data
 		samples = SERIAL.read(1000000).decode('ascii').split("\n") # new line means new reading
-
+		
 		
 		
 		if("sample_rate" not in samples[0]):
@@ -94,6 +100,8 @@ def request_sonar_data():
 		
 		current_buffer = ""
 		counter = 3
+		
+	
 		while(True):
 			
 			if("end_buffer_transfer" in samples[counter]):
@@ -104,7 +112,7 @@ def request_sonar_data():
 				#print(current_buffer)
 			else:
 				#print(samples[counter].replace("\r",""))
-				dict[current_buffer].append(float(samples[counter].replace("\r",""))) # remove \r
+				dict[current_buffer].append(int(samples[counter].replace("\r",""))) # remove \r
 			counter=counter+1
 		
 	except (NameError,serial.serialutil.SerialException) as e1:
@@ -125,7 +133,15 @@ if __name__ == "__main__":
 	print ("Requesting info data from Teensy")
 	request_info_data()
 	print ("Requesting sonar data from Teensy")
+	
+	start_time_millis = time.time()
+	start_time_fmt = time.strftime("%H:%M:%S", time.localtime())
+	
 	request_sonar_data()
+	
+	end_time_millis = time.time()
+	runtime = end_time_millis - start_time_millis
+	print("Runtime info: starttime={}, runtime={}s".format(start_time_fmt,round(runtime,2)))
 
 
 
