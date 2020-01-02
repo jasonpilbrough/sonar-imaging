@@ -4,6 +4,7 @@ from serial.tools import list_ports
 
 global TEENSY_DEVICE; TEENSY_DEVICE = '/dev/cu.usbmodem58714801' # '/dev/cu.usbmodem58714801' for Teensy board
 global BAUD_RATE; BAUD_RATE = 9600;
+global SERIAL_TIMEOUT; SERIAL_TIMEOUT = 0.35; # seconds that serial.read waits -> 0.35s is min for complete transfer 
 global SERIAL;
 
 
@@ -31,7 +32,7 @@ def list_serial_devices():
 def connect_to_Teensy():
 	global SERIAL;
 	try:
-		SERIAL = serial.Serial(TEENSY_DEVICE, BAUD_RATE, timeout = 0.35)
+		SERIAL = serial.Serial(TEENSY_DEVICE, BAUD_RATE, timeout = SERIAL_TIMEOUT)
 	except Exception as e:
 		print("Cant connect to device", end=" ")
 		print(e);
