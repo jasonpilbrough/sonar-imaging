@@ -1,2 +1,4 @@
 .DS_Store
 webserver/virtual/
+sandbox/
+signal_processing/__pycache__/
