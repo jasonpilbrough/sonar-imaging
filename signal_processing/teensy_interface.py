@@ -54,45 +54,35 @@ global SERIAL;
 
 # ================================= CLASS DEFINITIONS ================================== #
 
-class SerialFormatError(Exception):
-	"""Exception raised for errors in format of data exchanged during serial comms.
+
+class TeensyError(Exception):
+	"""Exception raised for errors in communication with Teensy
 	
-	This error is thrown when the bytes recieved during serial comms with Teensy are not 
-	in the expected format.
+	This error can be raised if no Teensy device is connected, or if the bytes recieved 
+	during serial comms with the Teensy are not in the expected format.
 	
 	Attributes
 	----------
-	expression : str 
-		input expression in which the error occurred
 	message : str
 		explanation of the error
 	"""
-	
-	
-	def __init__(self, expression, message):
+	def __init__(self, message):
 		"""
 		Parameters
 		----------
-		expression : str 
-			input expression in which the error occurred
 		message : str
 			explanation of the error	
 		"""
 		
-		self.expression = expression
 		self.message = message
+		self.expression = ""
 
 
 	def __str__(self):
-		""" returns formatted error string containing the expression and message.
+		""" returns string containing explaination of error """
 		
-		Returns
-		-------
-		str
-			formatted error message
-		"""
-		
-		return "expression '{}' caused: {}".format(self.expression, self.message)
+		return self.message
+
 
 
 # =============================== FUNCTION DEFINITIONS ================================= #
@@ -141,10 +131,9 @@ def request_status():
 		
 	Raises
 	------
-	SerialException
-		If the Teensy is not currently connected. 
-	SerialFormatError
-		If the format of the data retrieved from the Teensy is invalid.
+	Teensy Error
+		If any errors occure during Teensy comms, including no Teensy connection or 
+		invalid format 
 	"""
 	
 	dict = {}
@@ -160,7 +149,7 @@ def request_status():
 		info = teensy.read(100).decode('ascii').split("\n") # new line means new value
 	
 		if("sample_rate" not in info[0]):
-			raise SerialFormatError(info[0].replace("\r",""), "input does not contain string 'sample_rate'")
+			raise TeensyError("Format from Teensy not recognised: input does not contain string 'sample_rate' at index 0")
 		
 		# if no error has been thrown by this point, it means that the Teensy is connected
 		dict["connection"] = "Connected"
@@ -173,8 +162,8 @@ def request_status():
 		dict["connection"] = "Not Connected"
 		dict["sample_rate"] = "N/A"
 		
-	except SerialFormatError as e2:
-		print("\tFormat from teensy not recongised:", e2)
+	except TeensyError as e2:
+		print("\t", e2)
 		dict["connection"] = "Not Connected"
 		dict["sample_rate"] = "N/A"
 		
@@ -234,10 +223,9 @@ def request_sonar_data():
 		
 	Raises
 	------
-	SerialException
-		If the Teensy is not currently connected. 
-	SerialFormatError
-		If the format of the data retrieved from the Teensy is invalid.
+	Teensy Error
+		If any errors occure during Teensy comms, including no Teensy connection or 
+		invalid format 
 	"""
 
 	dict = {}
@@ -254,26 +242,31 @@ def request_sonar_data():
 		
 		
 		if("sample_rate" not in samples[0]):
-			raise SerialFormatError(samples[0].replace("\r",""), "input does not contain string 'sample_rate'")
+			raise TeensyError("Format from Teensy not recognised: input does not contain string 'sample_rate' at index 0")
 		
 		dict["sample_rate"] = float(samples[1].replace("\r",""))
 		
 		if("max_adc_code" not in samples[2]):
-			raise SerialFormatError(samples[2].replace("\r",""), "input does not contain string 'max_adc_code'")
+			raise TeensyError("Format from Teensy not recognised: input does not contain string 'max_adc_code' at index 2")
 		
 		# maximum adc code - e.g. if 10bit ADC is used, max code is 2**10 = 1024. Used to 
 		# convert adc code into a voltage. 
 		max_adc_code = float(samples[3].replace("\r",""))
 		
 		if("start_buffer_transfer" not in samples[4]):
-			raise SerialFormatError(samples[4], "input does not contain string 'start_buffer_transfer'")
+			raise TeensyError("Format from Teensy not recognised: input does not contain string 'start_buffer_transfer' at index 4")
 		
 		current_buffer = ""
 		counter = 5 # start iterations after 'start_buffer_transfer' at index 5
 		
 		while(True):		
-			# indicates end of sonar data
-			if("end_buffer_transfer" in samples[counter]):
+		
+			# if end is reached without receiving 'end_buffer_transfer' string, raise an error
+			if(counter>=len(samples)):
+				raise TeensyError("Format from Teensy not recognised: input does not end with string 'end_buffer_transfer'")
+				
+			# indicates end of sonar data	
+			elif("end_buffer_transfer" in samples[counter]):
 				break
 			
 			# indicates start of new buffer/channel 
@@ -293,13 +286,19 @@ def request_sonar_data():
 			
 			counter=counter+1
 		
-	except (NameError,serial.serialutil.SerialException) as e1:
-		print(e1)
-		dict = {}
-	except SerialFormatError as e2:
-		print("format from teensy not recongised", end=" ")
-		print(e2)
-		dict = {}
+
+	except (serial.serialutil.SerialException) as e1:
+		print("\tCould not connect to Teensy")
+		
+		# re-raise as TeensyError so it can be handled correctly above
+		raise TeensyError("Could not connect to Teensy")
+	
+	except TeensyError as e2:
+		print("\t",e2)
+		
+		# re-raise as TeensyError so it can be handled correctly above
+		raise TeensyError(e2.message)
+
 	
 	return dict
 

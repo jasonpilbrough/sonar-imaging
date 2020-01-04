@@ -3,7 +3,7 @@ import sys
 sys.path.append('../signal_processing')
 import sonar_processing as sp
 import teensy_interface
-from teensy_interface import FormatError
+from teensy_interface import TeensyError
 
 from flask import Flask, render_template, request
 from flask import jsonify
@@ -51,7 +51,7 @@ def sonar_image_2D_process():
 		FigureCanvas(fig).print_png(output)
 		return Response(output.getvalue(), mimetype='image/png')
 	
-	except FormatError:
+	except TeensyError:
 		return send_file("static/images/micro_error.png", mimetype='image/gif')
 
 @app.route('/sonar_image_1D.png')
@@ -72,16 +72,15 @@ def sonar_image_1D_process():
 	
 		return Response(output.getvalue(), mimetype='image/png')
 	
-	except FormatError:
+	except TeensyError:
 		return send_file("static/images/micro_error.png", mimetype='image/gif')
-
 
 @app.route("/micro_status", methods=['POST'])
 def micro_status_process():
 	if request.method == 'POST':
-		reply = teensy_interface.request_info_data();
+		reply = teensy_interface.request_status();
 		return jsonify(reply)
 
 if __name__ == "__main__":
-    #app.run(debug=True)
-    app.run(host='0.0.0.0')
+    app.run(debug=True)
+    #app.run(host='0.0.0.0')
