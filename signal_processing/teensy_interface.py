@@ -186,8 +186,10 @@ def request_sonar_data():
 	"""Sends transmit command to Teensy and retrieves the captured recieve signals.
 	
 	The sonar data includes the recieve signal captured from each of the channels on the
-	sonar. The sampling rate of the ADC is also included. This is vital important for any 
-	subsequent signal processing, as the sampling rate is not fixed. 
+	sonar. The sampling rate of the ADC is included. This is vital important for any 
+	subsequent signal processing, as the sampling rate is not fixed. Also, the maximum
+	ADC code is provided. This is determined by the resolution of the ADC and is required
+	to convert each adc code into avoltage
 	
 	To request sonar data from the Teensy, the Teensy expects the char 'f' to be written 
 	to the serial port.
@@ -197,6 +199,8 @@ def request_sonar_data():
 	
 	"sample_rate"
 	<sample_rate_in_Hz>
+	"max_adc_code"
+	<max_adc_code>
 	"start_buffer_transfer"
 	"buffer0"
 	123
@@ -209,9 +213,10 @@ def request_sonar_data():
 	...
 	"end_buffer_transfer"
 	
-	Note that each of the sampled values must be in the range 0 -> 1023. A maximum of 
-	1000000 bytes are read from the serial port. If less than 1000000 bytes are written by 
-	the Teensy, then the serial port will automatically close after period SERIAL_TIMEOUT.
+	Note that each of the sampled values is provided as an adc_code. These will be in the
+	range from 0 -> max_adc_code. A maximum of 1000000 bytes are read from the serial 
+	port. If less than 1000000 bytes are written by the Teensy, then the serial port will 
+	automatically close after period SERIAL_TIMEOUT.
 	
 	Returns
 	-------
@@ -219,12 +224,13 @@ def request_sonar_data():
 	the sample rate. The dictionary might look as follows:
 	
 		{"sample_rate" : "104.12 kHz",
-		 "buffer0"     : [123, 122, 345,...],    
+		 "buffer0"     : [1.2, 1.1, 1.1,...],    
 		 "buffer1"     : [...],
 		 	...
 		 "buffer<n>"   : [...]}
 	
-	If Teensy is not connected, then an empty dictionary {} is returned
+	Note that each sample has been converted from its adc code to the voltage it 
+	represents. If Teensy is not connected, then an empty dictionary {} is returned.
 		
 	Raises
 	------
@@ -252,11 +258,18 @@ def request_sonar_data():
 		
 		dict["sample_rate"] = float(samples[1].replace("\r",""))
 		
-		if("start_buffer_transfer" not in samples[2]):
-			raise SerialFormatError(samples[2], "input does not contain string 'start_buffer_transfer'")
+		if("max_adc_code" not in samples[2]):
+			raise SerialFormatError(samples[2].replace("\r",""), "input does not contain string 'max_adc_code'")
+		
+		# maximum adc code - e.g. if 10bit ADC is used, max code is 2**10 = 1024. Used to 
+		# convert adc code into a voltage. 
+		max_adc_code = float(samples[3].replace("\r",""))
+		
+		if("start_buffer_transfer" not in samples[4]):
+			raise SerialFormatError(samples[4], "input does not contain string 'start_buffer_transfer'")
 		
 		current_buffer = ""
-		counter = 3 # start iterations after 'start_buffer_transfer' at index [3]
+		counter = 5 # start iterations after 'start_buffer_transfer' at index 5
 		
 		while(True):		
 			# indicates end of sonar data
@@ -270,8 +283,13 @@ def request_sonar_data():
 				
 				dict[current_buffer] = []
 			else:
+				adc_code = int(samples[counter].replace("\r","")) # remove \r
+				
+				# convert adc code into voltage - assumes teensy has 3.3V reference
+				voltage = adc_code * 3.3 / (max_adc_code - 1)
+				
 				# append next sample to appropriate key in dict
-				dict[current_buffer].append(int(samples[counter].replace("\r",""))) # remove \r
+				dict[current_buffer].append(voltage) 
 			
 			counter=counter+1
 		

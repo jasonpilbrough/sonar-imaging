@@ -110,6 +110,8 @@ void loop() {
             int starttime = micros();
             Serial.println("sample_rate");
             Serial.println(ADC_speedTest());
+            Serial.println("max_adc_code");
+            Serial.println(1<<ADC_RESOLUTION);
             clearBuffers();
             
             OUTPUT_COUNTER = 0;
