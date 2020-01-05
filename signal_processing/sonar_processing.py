@@ -719,8 +719,8 @@ def generate_1D_image():
 	
 	global DEBUG_ACTIVE_RECIEVER; DEBUG_ACTIVE_RECIEVER =0
 	
-	# dictionary stores all sonar data
-	dict = teensy_interface.request_sonar_data()
+	# dictionary stores all sonar data - use short_timeout=True for 1D sonar
+	dict = teensy_interface.request_sonar_data(short_timeout=True)
 	
 	# could not connect to teensy - return empty figure
 	if(len(dict)==0):
@@ -913,8 +913,8 @@ def generate_2D_image():
 	
 	global DEBUG_ACTIVE_RECIEVER; DEBUG_ACTIVE_RECIEVER =0
 	
-	# dictionary stores all sonar data
-	dict = teensy_interface.request_sonar_data()
+	# dictionary stores all sonar data - use short_timeout=False for 2D sonar
+	dict = teensy_interface.request_sonar_data(short_timeout=False)
 	
 	# could not connect to teensy - return empty figure
 	if(len(dict)==0):

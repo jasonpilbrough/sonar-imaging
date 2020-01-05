@@ -47,6 +47,8 @@ const int OUTPUT_PIN = 13;  // pin connected to transmitter
 
 void setup(){
 
+  Serial.begin(9600); // USB is always 12 Mbit/sec
+
   //configure all input pins to input mode
   pinMode(READ_PIN0, INPUT);
   pinMode(READ_PIN1, INPUT);
@@ -91,6 +93,7 @@ void loop() {
 
    i - info mode: confirm micro is connected and send ADC sample rate on Serial
    f - full op mode: transmit chirp, sample return on 8 channels, send ADC speed and 8 buffers on Serial
+   g - short op mode: transmit chirp, sample return on 8 channels, but only send ADC speed and buffer0 on Serial
 
    s - speed ADC: print ADC sample speed to Serial
    t - speed DAC: print DAC sample speed to Serial
@@ -119,7 +122,26 @@ void loop() {
             
             read_all_pins_cont();
             send_all_buffers();
-            //Serial.println(ADC_REF_VALUE*PIN0_VALUES[0]/(adc->getMaxValue()),4);
+      
+            clearBuffers();
+            Serial.print("Runtime: ");
+            Serial.print(micros()-starttime);
+            Serial.println(" us");
+            
+        } else if (c=='g'){
+            int starttime = micros();
+            Serial.println("sample_rate");
+            Serial.println(ADC_speedTest());
+            Serial.println("max_adc_code");
+            Serial.println(1<<ADC_RESOLUTION);
+            clearBuffers();
+            
+            OUTPUT_COUNTER = 0;
+            outputToDac(TIMER_DELAY);
+            
+            read_all_pins_cont();
+            send_buffer0();
+            
             clearBuffers();
             Serial.print("Runtime: ");
             Serial.print(micros()-starttime);
@@ -199,6 +221,18 @@ void send_all_buffers(){
   Serial.println("end_buffer_transfer");
   
 }
+
+void send_buffer0(){
+
+  Serial.println("start_buffer_transfer");
+  Serial.println("buffer0");
+  for(uint32_t i = 0; i< ARR_COUNTER; i++){
+     Serial.println(PIN0_VALUES[i]);
+  }
+  Serial.println("end_buffer_transfer");
+   
+}
+
 
 double convertCodeToVoltage(uint16_t value){
   return ADC_REF_VALUE*value/(adc->getMaxValue());

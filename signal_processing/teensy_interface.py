@@ -44,12 +44,13 @@ global TEENSY_DEVICE; TEENSY_DEVICE = '/dev/cu.usbmodem58714801'
 # baud rate of the serial coms -> may be overwritten if using USB to default USB baud rate 
 global BAUD_RATE; BAUD_RATE = 9600;
 
-# seconds that serial port waits after last byte before closing connection 
-# it was determined that 0.35s is min for complete transfer for this application 
-global SERIAL_TIMEOUT; SERIAL_TIMEOUT = 0.35; 
+# Seconds that serial port waits after last byte before closing connection. Two different
+# timeout values are defined: Use SERIAL_TIMEOUT_SHORT when receiving sonar data from
+# a single receiver (1D mode), and SERIAL_TIMEOUT_LONG when receiving sonar data 
+# from multiple receivers. 
+global SERIAL_TIMEOUT_LONG; SERIAL_TIMEOUT_LONG = 0.8; 
+global SERIAL_TIMEOUT_SHORT; SERIAL_TIMEOUT_SHORT = 0.2; 
 
-# holds reference to serial.Serial()
-global SERIAL;
 
 
 # ================================= CLASS DEFINITIONS ================================== #
@@ -114,8 +115,8 @@ def request_status():
 	<sample_rate_in_Hz>
 	
 	Note that a maximum of 100 bytes are read from the serial port. If less than 100 bytes
-	are written by the Teensy, then the serial port will automatically close after period
-	SERIAL_TIMEOUT.
+	are written by the Teensy, then the serial port will automatically close after timeout 
+	period (SERIAL_TIMEOUT_SHORT is used by default).
 	
 	Returns
 	-------
@@ -140,7 +141,7 @@ def request_status():
 	
 	try:
 		# establish serial connection with teensy 
-		teensy = serial.Serial(TEENSY_DEVICE, BAUD_RATE, timeout = SERIAL_TIMEOUT)
+		teensy = serial.Serial(TEENSY_DEVICE, BAUD_RATE, timeout = SERIAL_TIMEOUT_SHORT)
 		
 		# send command to teensy to return status data
 		teensy.write(str("i").encode())
@@ -171,7 +172,7 @@ def request_status():
 	return dict
 
 
-def request_sonar_data():
+def request_sonar_data(short_timeout=False):
 	"""Sends transmit command to Teensy and retrieves the captured recieve signals.
 	
 	The sonar data includes the recieve signal captured from each of the channels on the
@@ -205,8 +206,16 @@ def request_sonar_data():
 	Note that each of the sampled values is provided as an adc_code. These will be in the
 	range from 0 -> max_adc_code. A maximum of 1000000 bytes are read from the serial 
 	port. If less than 1000000 bytes are written by the Teensy, then the serial port will 
-	automatically close after period SERIAL_TIMEOUT.
+	automatically close after timeout period.
 	
+	Parameters
+	----------
+	short_timeout : bool, optional
+		if true sets serial timeout to SERIAL_TIMEOUT_SHORT, if false sets serial timeout 
+		to SERIAL_TIMEOUT_LONG. Use SERIAL_TIMEOUT_SHORT when receiving sonar data from
+		a single receiver (1D mode), and SERIAL_TIMEOUT_LONG when receiving sonar data 
+		from multiple receivers.
+		
 	Returns
 	-------
 	A dictionary containing the recived signal buffer for each sonar channel, as well as 
@@ -231,14 +240,21 @@ def request_sonar_data():
 	dict = {}
 	
 	try:
-		# establish serial connection with teensy 
-		teensy = serial.Serial(TEENSY_DEVICE, BAUD_RATE, timeout = SERIAL_TIMEOUT)
 		
-		# send command to teensy to transmit chirp and return sampled echos
-		teensy.write(str("f").encode())
+		# establish serial connection with teensy and send command to transmit chirp and 
+		# return sampled echos
+		if(short_timeout):
+			teensy = serial.Serial(TEENSY_DEVICE, BAUD_RATE, timeout = SERIAL_TIMEOUT_SHORT)
+			# command 'g' is send for short mode
+			teensy.write(str("g").encode())
+		else:
+			teensy = serial.Serial(TEENSY_DEVICE, BAUD_RATE, timeout = SERIAL_TIMEOUT_LONG)
+			# command 'f' is send for short mode
+			teensy.write(str("f").encode())
+		
 		
 		# retrieve data from Teensy
-		samples = teensy.read(1000000).decode('ascii').split("\n") # new line means new value
+		samples = teensy.read(10000000).decode('ascii').split("\n") # new line means new value
 		
 		
 		if("sample_rate" not in samples[0]):
@@ -260,11 +276,12 @@ def request_sonar_data():
 		counter = 5 # start iterations after 'start_buffer_transfer' at index 5
 		
 		while(True):		
-		
+			
+			
 			# if end is reached without receiving 'end_buffer_transfer' string, raise an error
 			if(counter>=len(samples)):
 				raise TeensyError("Format from Teensy not recognised: input does not end with string 'end_buffer_transfer'")
-				
+			
 			# indicates end of sonar data	
 			elif("end_buffer_transfer" in samples[counter]):
 				break
