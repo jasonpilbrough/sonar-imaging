@@ -72,11 +72,12 @@ steps:
 
 import matplotlib; 
 
-# NB to plot in window comment out the following line, to plot in browser dont comment out
+# NB 'agg' backend is required to plot in browser, to plot in window main method will
+# change backend to "MacOSX". This statement must run before pyplot is imported. 
 matplotlib.use('agg')
 
-import random
 import matplotlib.pyplot as plt
+import random
 import numpy as np
 import pyfftw
 import math
@@ -85,9 +86,6 @@ import teensy_interface
 
 
 # ================================= GLOBAL VARIABLES =================================== #
-
-global DEBUG_MODE_ACTIVE; DEBUG_MODE_ACTIVE = True
-global DEBUG_ACTIVE_RECIEVER; DEBUG_ACTIVE_RECIEVER = 0
 
 global c; c = 343							# speed of sound in air [meters/sec]
 global r_max; r_max = 10					# max range [meters]
@@ -127,6 +125,9 @@ else:   # case N odd
 # transmitter is located at the origin (0,0). The receivers are spaced evenly appart 
 # forming a linear array centered on the origin, with a north-south orientation.
 
+# define radial axis, and azimuth axis  
+global rad; rad = np.linspace(0, r_max, 150)
+global azm; azm = np.linspace(-np.pi/4, np.pi/4, 160)
 
 # the origin (0,0) is defined as the location of the transmitter 
 global transmit_coord; transmit_coord = (0.0,0.0)
@@ -137,9 +138,20 @@ global reciever_spacing; reciever_spacing = 0.01
 global reciever_coords; reciever_coords = [(reciever_spacing*3.5, 3*np.pi/2),(reciever_spacing*2.5, 3*np.pi/2),(reciever_spacing*1.5, 3*np.pi/2),(reciever_spacing*0.5, 3*np.pi/2),(reciever_spacing*0.5, np.pi/2),(reciever_spacing*1.5, np.pi/2),(reciever_spacing*2.5, np.pi/2),(reciever_spacing*3.5, np.pi/2)]
 global target_coords; target_coords = [(4,10*np.pi/180),(5,10*np.pi/180),(6,10*np.pi/180),(7,10*np.pi/180),(5.5,10*np.pi/180)]  #global target_coords; target_coords = [(5, -60*np.pi/180),(8.2,60*np.pi/180)]
 
-# define radial axis, and azimuth axis  
-global rad; rad = np.linspace(0, r_max, 150)
-global azm; azm = np.linspace(-np.pi/4, np.pi/4, 160)
+
+# DEBUGGING 
+
+global DEBUG_MODE_ACTIVE; DEBUG_MODE_ACTIVE = False
+global DEBUG_DIR; DEBUG_DIR = "../signal_processing/debug"
+global DEBUG_ACTIVE_RECIEVER; DEBUG_ACTIVE_RECIEVER = 0
+
+
+# RECORDING RECEIVE SIGNAL
+
+global RX_FILENAME; RX_FILENAME = "RX_signal.txt"
+global RECORD_RX; RECORD_RX = True
+global USE_RECORDED_RX; USE_RECORDED_RX = False
+#gt = np.loadtxt("receive_signal.txt")
 
 
 # =============================== FUNCTION DEFINITIONS ================================= #
@@ -164,7 +176,6 @@ def make_chirp():
 	xt = rect((t - T/2)/T)*np.cos(2*np.pi*(f0*t+0.5*K*t**2))
 	fft = pyfftw.builders.fft(xt) # compute fft
 	Xw = fft() 
-	
 	
 	
 	if(DEBUG_MODE_ACTIVE):
@@ -222,8 +233,6 @@ def simulate_recieve_signal(td_targets):
 	Vw = fft() 
 	
 	
-	#plot v(t) and V(f)
-	
 	if(DEBUG_MODE_ACTIVE):
 		fig, (tplot, fplot) = plt.subplots(2, 1, figsize=(8,6))
 		fig.suptitle("Recieved signal v(t)", y=0.94)
@@ -272,6 +281,9 @@ def prepare_recieve_signal(samples):
 	Vw = fft() 
 	
 	
+	# save receive signal as text file if RECORD_RX == True
+	if(RECORD_RX):
+		np.savetxt(RX_FILENAME, vt, delimiter=',')
 	
 	
 	if(DEBUG_MODE_ACTIVE):
@@ -1030,10 +1042,9 @@ def save_figure(fig, filename):
 		
 	"""
 	
-	# Create new directory
-	output_dir = "debug"
-	mkdir_p(output_dir)
-	fullpath = '{}/{}'.format(output_dir, filename)
+	# Create new directory if it doesnt exist
+	mkdir_p(DEBUG_DIR)
+	fullpath = '{}/{}'.format(DEBUG_DIR, filename)
 	fig.savefig(fullpath, dpi=150, bbox_inches="tight")
 
 
@@ -1053,6 +1064,12 @@ def mkdir_p(mypath):
 # ====================================== MAIN ========================================== #
 
 if __name__ == "__main__":
+	
+	plt.switch_backend("MacOSX")
+	DEBUG_DIR = "debug"
+	DEBUG_MODE_ACTIVE = True
+	
+	generate_1D_image();
 	
 	
 	"""
@@ -1101,9 +1118,9 @@ if __name__ == "__main__":
 	
 	plot_2D_image(z)
 	"""
+
+
 	
-	
-	generate_1D_image_sim();
 	
 
 
