@@ -86,6 +86,9 @@ import teensy_interface
 
 # ================================= GLOBAL VARIABLES =================================== #
 
+global DEBUG_MODE_ACTIVE; DEBUG_MODE_ACTIVE = True
+global DEBUG_ACTIVE_RECIEVER; DEBUG_ACTIVE_RECIEVER = 0
+
 global c; c = 343							# speed of sound in air [meters/sec]
 global r_max; r_max = 10					# max range [meters]
 
@@ -162,18 +165,25 @@ def make_chirp():
 	fft = pyfftw.builders.fft(xt) # compute fft
 	Xw = fft() 
 	
-	"""
-	#plot x(t) and X(f)
-	fig, (tplot, fplot) = plt.subplots(2, 1)
-	#plt.title("input chirp signal")
-	tplot.plot(t,xt,linewidth=0.7, color="#2da6f7")
-	tplot.set_xlabel("t [s]")
-	tplot.set_ylabel("x(t)")
-	fplot.plot(f_axis, np.fft.fftshift(abs(Xw)),linewidth=0.7, color="#2da6f7")
-	fplot.set_xlabel("f [Hz]")
-	fplot.set_ylabel("X(f)")
-	#plt.show()
-	"""
+	
+	
+	if(DEBUG_MODE_ACTIVE):
+		fig, (tplot, fplot) = plt.subplots(2, 1, figsize=(8,6))
+		fig.suptitle("Transmitted chirp x(t)", y=0.94)
+		plt.subplots_adjust(top=0.89,hspace=0.3)
+		
+		tplot.plot(t,xt,linewidth=0.7, color="#2da6f7")
+		tplot.set_xlabel("t [s]")
+		tplot.set_ylabel("x(t)")
+		
+		fplot.plot(f_axis, np.fft.fftshift(abs(Xw)),linewidth=0.7, color="#2da6f7")
+		fplot.set_xlabel("f [Hz]")
+		fplot.set_ylabel("X(f)")
+		
+		#plt.show(block=False)
+		save_figure(fig, "{}_1_chirp.png".format(DEBUG_ACTIVE_RECIEVER))
+		plt.close()
+	
 	
 	return xt , Xw
 
@@ -211,18 +221,26 @@ def simulate_recieve_signal(td_targets):
 	fft = pyfftw.builders.fft(vt) # compute fft
 	Vw = fft() 
 	
-	"""
+	
 	#plot v(t) and V(f)
-	fig, (tplot, fplot) = plt.subplots(2, 1)
-	#plt.title("recieved signal")
-	tplot.plot(s,vt,linewidth=0.7, color="#2da6f7")
-	tplot.set_xlabel("t [s]")
-	tplot.set_ylabel("v(t)")
-	fplot.plot(f_axis, np.fft.fftshift(abs(Vw)),linewidth=0.7, color="#2da6f7")
-	fplot.set_xlabel("f [Hz]")
-	fplot.set_ylabel("V(f)")
-	plt.show(block=False)
-	"""
+	
+	if(DEBUG_MODE_ACTIVE):
+		fig, (tplot, fplot) = plt.subplots(2, 1, figsize=(8,6))
+		fig.suptitle("Recieved signal v(t)", y=0.94)
+		plt.subplots_adjust(top=0.89,hspace=0.3)
+		
+		tplot.plot(s,vt,linewidth=0.7, color="#2da6f7")
+		tplot.set_xlabel("t [s]")
+		tplot.set_ylabel("v(t)")
+		
+		fplot.plot(f_axis, np.fft.fftshift(abs(Vw)),linewidth=0.7, color="#2da6f7")
+		fplot.set_xlabel("f [Hz]")
+		fplot.set_ylabel("V(f)")
+		
+		#plt.show(block=True)
+		save_figure(fig, "{}_2_receive.png".format(DEBUG_ACTIVE_RECIEVER))
+		plt.close()
+	
 	
 	return vt, Vw
 
@@ -253,19 +271,26 @@ def prepare_recieve_signal(samples):
 	fft = pyfftw.builders.fft(vt) # compute fft
 	Vw = fft() 
 	
-	"""
-	#plot v(t) and V(f)
-	fig, (tplot, fplot) = plt.subplots(2, 1)
-	#plt.title("recieved signal")
-	tplot.plot(t,vt,linewidth=0.7, color="#2da6f7")
-	#tplot.plot(t,np.ones(N)*0.058,linewidth=0.7, color="r")
-	tplot.set_xlabel("t [s]")
-	tplot.set_ylabel("v(t)")
-	fplot.plot(f_axis, np.fft.fftshift(abs(Vw)),linewidth=0.7, color="#2da6f7")
-	fplot.set_xlabel("f [Hz]")
-	fplot.set_ylabel("V(f)")
-	plt.show(block=False)
-	"""
+	
+	
+	
+	if(DEBUG_MODE_ACTIVE):
+		fig, (tplot, fplot) = plt.subplots(2, 1, figsize=(8,6))
+		fig.suptitle("Recieved signal v(t)", y=0.94)
+		plt.subplots_adjust(top=0.89,hspace=0.4)
+
+		tplot.plot(t,vt,linewidth=0.7, color="#2da6f7")
+		tplot.set_xlabel("t [s]")
+		tplot.set_ylabel("v(t)")
+		
+		fplot.plot(f_axis, np.fft.fftshift(abs(Vw)),linewidth=0.7, color="#2da6f7")
+		fplot.set_xlabel("f [Hz]")
+		fplot.set_ylabel("V(f)")
+		
+		#plt.show(block=True)
+		save_figure(fig, "{}_2_receive.png".format(DEBUG_ACTIVE_RECIEVER))
+		plt.close()
+	
 	
 	
 	return vt, Vw
@@ -306,18 +331,25 @@ def pulse_compression(Xw,Vw):
 	fft = pyfftw.builders.ifft(Yw) # compute inverse fft
 	yt = fft() 
 	
-	"""
-	#plot y(t) and Y(f)
-	fig, (tplot, fplot) = plt.subplots(2, 1)
-	#plt.title("output of inverse filter")
-	tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
-	tplot.set_xlabel("t [s]")
-	tplot.set_ylabel("y(t)")
-	fplot.plot(f_axis, np.fft.fftshift(abs(Yw)),linewidth=0.7, color="#2da6f7")
-	fplot.set_xlabel("f [Hz]")
-	fplot.set_ylabel("Y(f)")
-	plt.show()
-	"""
+
+	
+	if(DEBUG_MODE_ACTIVE):
+		fig, (tplot, fplot) = plt.subplots(2, 1, figsize=(8,6))
+		fig.suptitle("Output of inverse filter y(t)", y=0.94)
+		plt.subplots_adjust(top=0.89,hspace=0.3)
+		
+		tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
+		tplot.set_xlabel("t [s]")
+		tplot.set_ylabel("y(t)")
+		
+		fplot.plot(f_axis, np.fft.fftshift(abs(Yw)),linewidth=0.7, color="#2da6f7")
+		fplot.set_xlabel("f [Hz]")
+		fplot.set_ylabel("Y(f)")
+		
+		#plt.show()
+		save_figure(fig, "{}_3_inverse_filter.png".format(DEBUG_ACTIVE_RECIEVER))
+		plt.close()
+	
 	
 	return yt, Yw
 
@@ -348,18 +380,25 @@ def to_analytic_signal(Xw):
 	fft = pyfftw.builders.ifft(Yw) # compute inverse fft
 	yt = fft() 
 	
-	"""
-	#plot y(t) and Y(f)
-	fig, (tplot, fplot) = plt.subplots(2, 1)
-	#plt.title("analytic output signal")
-	tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
-	tplot.set_xlabel("t [s]")
-	tplot.set_ylabel("y(t)")
-	fplot.plot(f_axis, np.fft.fftshift(abs(Yw)),linewidth=0.7, color="#2da6f7")
-	fplot.set_xlabel("f [Hz]")
-	fplot.set_ylabel("Y(f)")
-	plt.show(block=False)
-	"""
+	
+
+	if(DEBUG_MODE_ACTIVE):
+		fig, (tplot, fplot) = plt.subplots(2, 1, figsize=(8,6))
+		fig.suptitle("Analytic signal y(t)", y=0.94)
+		plt.subplots_adjust(top=0.89,hspace=0.3)
+		
+		tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
+		tplot.set_xlabel("t [s]")
+		tplot.set_ylabel("y(t)")
+		
+		fplot.plot(f_axis, np.fft.fftshift(abs(Yw)),linewidth=0.7, color="#2da6f7")
+		fplot.set_xlabel("f [Hz]")
+		fplot.set_ylabel("Y(f)")
+		
+		#plt.show(block=True)
+		save_figure(fig, "{}_4_analytic.png".format(DEBUG_ACTIVE_RECIEVER))
+		plt.close()
+	
 	
 	
 	return yt, Yw
@@ -403,21 +442,29 @@ def apply_window_function(Xw, window_B, window_fc):
 	fft = pyfftw.builders.ifft(Yw) # compute inverse fft
 	yt = fft() 
 	
-	"""
-	#plot y(t) and Y(f)
-	fig, (tplot, fplot, hplot) = plt.subplots(3, 1)
-	#plt.title("analytic output signal")
-	tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
-	tplot.set_xlabel("t [s]")
-	tplot.set_ylabel("y(t)")
-	fplot.plot(f, abs(Yw),linewidth=0.7, color="#2da6f7")
-	fplot.set_xlabel("f [Hz]")
-	fplot.set_ylabel("Y(f)")
-	hplot.plot(f, abs(Hw),linewidth=0.7, color="#2da6f7")
-	hplot.set_xlabel("f [Hz]")
-	hplot.set_ylabel("H(f)")
-	plt.show(block=False)
-	"""
+	
+	
+	if(DEBUG_MODE_ACTIVE):
+		fig, (tplot, fplot, hplot) = plt.subplots(3, 1, figsize=(8,6))
+		fig.suptitle("Output after window function y(t)", y=0.94)
+		plt.subplots_adjust(top=0.89,hspace=0.4)
+		
+		tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
+		tplot.set_xlabel("t [s]")
+		tplot.set_ylabel("y(t)")
+		
+		fplot.plot(f, abs(Yw),linewidth=0.7, color="#2da6f7")
+		fplot.set_xlabel("f [Hz]")
+		fplot.set_ylabel("Y(f)")
+		
+		hplot.plot(f, abs(Hw),linewidth=0.7, color="#2da6f7")
+		hplot.set_xlabel("f [Hz]")
+		hplot.set_ylabel("H(f)")
+		
+		#plt.show(block=True)
+		save_figure(fig, "{}_5_window.png".format(DEBUG_ACTIVE_RECIEVER))
+		plt.close()
+	
 	
 	return yt, Yw
 
@@ -445,18 +492,24 @@ def to_baseband(xt):
 	fft = pyfftw.builders.fft(yt) # compute fft
 	Yw = fft() 
 	
-	"""
-	#plot y(t) and Y(f)
-	fig, (tplot, fplot) = plt.subplots(2, 1)
-	#plt.title("analytic output signal")
-	tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
-	tplot.set_xlabel("t [s]")
-	tplot.set_ylabel("y(t)")
-	fplot.plot(f_axis, np.fft.fftshift(abs(Yw)),linewidth=0.7, color="#2da6f7")
-	fplot.set_xlabel("f [Hz]")
-	fplot.set_ylabel("Y(f)")
-	plt.show()
-	"""
+
+	if(DEBUG_MODE_ACTIVE):
+		fig, (tplot, fplot) = plt.subplots(2, 1, figsize=(8,6))
+		fig.suptitle("Output after basbanding y(t)", y=0.94)
+		plt.subplots_adjust(top=0.89,hspace=0.4)
+		
+		tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
+		tplot.set_xlabel("t [s]")
+		tplot.set_ylabel("y(t)")
+		
+		fplot.plot(f_axis, np.fft.fftshift(abs(Yw)),linewidth=0.7, color="#2da6f7")
+		fplot.set_xlabel("f [Hz]")
+		fplot.set_ylabel("Y(f)")
+		
+		#plt.show()
+		save_figure(fig, "{}_6_baseband.png".format(DEBUG_ACTIVE_RECIEVER))
+		plt.close()
+	
 	
 	return yt, Yw
 
@@ -490,18 +543,24 @@ def range_compensation(xt):
 	fft = pyfftw.builders.fft(yt) # compute fft
 	Yw = fft() 
 	
-	"""
-	#plot y(t) and Y(f)
-	fig, (tplot1, tplot2) = plt.subplots(2, 1)
-	#plt.title("analytic output signal")
-	tplot1.plot(t,abs(xt),linewidth=0.7, color="#2da6f7")
-	tplot1.set_xlabel("t [s]")
-	tplot1.set_ylabel("x(t)")
-	tplot2.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
-	tplot2.set_xlabel("t [s]")
-	tplot2.set_ylabel("y(t)")
-	plt.show(block = False)
-	"""
+	
+	if(DEBUG_MODE_ACTIVE):
+		fig, (tplot1, tplot2) = plt.subplots(2, 1, figsize=(8,6))
+		fig.suptitle("Output before and after range compensation", y=0.94)
+		plt.subplots_adjust(top=0.89,hspace=0.4)
+		
+		tplot1.plot(t,abs(xt),linewidth=0.7, color="#2da6f7")
+		tplot1.set_xlabel("t [s]")
+		tplot1.set_ylabel("x(t)")
+		
+		tplot2.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
+		tplot2.set_xlabel("t [s]")
+		tplot2.set_ylabel("y(t)")
+		
+		#plt.show(block = True)
+		save_figure(fig, "{}_7_range_comp.png".format(DEBUG_ACTIVE_RECIEVER))
+		plt.close()
+	
 	
 	return yt, Yw
 
@@ -534,19 +593,24 @@ def produce_range_profile_sim(td_targets):
 	yt, Yw = range_compensation(yt)
 	
 	
-	"""
-	#plot y(t) and Y(f)
-	fig, (tplot, fplot) = plt.subplots(2, 1)
-	#plt.title("analytic output signal")
-	tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
-	tplot.set_xlabel("d [m]")
-	tplot.set_ylabel("{}".format("|y(t)|"))
-	#fplot.plot(f_axis, np.fft.fftshift(abs(Yw)),linewidth=0.7, color="#2da6f7")
-	fplot.plot(t, np.angle(yt),linewidth=0.7, color="#2da6f7")
-	fplot.set_xlabel("d [m]")
-	fplot.set_ylabel("<y(t)")
-	plt.show(block = False)
-	"""
+
+	if(DEBUG_MODE_ACTIVE):
+		fig, (tplot1, tplot2) = plt.subplots(2, 1, figsize=(8,6))
+		fig.suptitle("Processed Range Profile", y=0.94)
+		plt.subplots_adjust(top=0.89,hspace=0.4)
+		
+		tplot1.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
+		tplot1.set_xlabel("d [m]")
+		tplot1.set_ylabel("{}".format("|y(t)|"))
+		
+		tplot2.plot(t, np.angle(yt),linewidth=0.7, color="#2da6f7")
+		tplot2.set_xlabel("d [m]")
+		tplot2.set_ylabel("<y(t)")
+		
+		#plt.show(block = True)
+		save_figure(fig, "{}_8_range_profile.png".format(DEBUG_ACTIVE_RECIEVER))
+		plt.close()
+	
 	
 	
 	return yt
@@ -579,19 +643,23 @@ def produce_range_profile(samples):
 	yt, Yw = range_compensation(yt)
 	
 	
-	"""
-	#plot y(t) and Y(f)
-	fig, (tplot, fplot) = plt.subplots(2, 1)
-	#plt.title("analytic output signal")
-	tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
-	tplot.set_xlabel("d [m]")
-	tplot.set_ylabel("{}".format("|y(t)|"))
-	#fplot.plot(f_axis, np.fft.fftshift(abs(Yw)),linewidth=0.7, color="#2da6f7")
-	fplot.plot(t, np.angle(yt),linewidth=0.7, color="#2da6f7")
-	fplot.set_xlabel("d [m]")
-	fplot.set_ylabel("<y(t)")
-	plt.show(block = False)
-	"""
+	
+	if(DEBUG_MODE_ACTIVE):
+		fig, (tplot1, tplot2) = plt.subplots(2, 1, figsize=(8,6))
+		fig.suptitle("Processed Range Profile", y=0.94)
+		plt.subplots_adjust(top=0.89,hspace=0.4)
+		
+		tplot1.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
+		tplot1.set_xlabel("d [m]")
+		tplot1.set_ylabel("{}".format("|y(t)|"))
+		
+		tplot2.plot(t, np.angle(yt),linewidth=0.7, color="#2da6f7")
+		tplot2.set_xlabel("d [m]")
+		tplot2.set_ylabel("<y(t)")
+		
+		#plt.show(block = False)
+		save_figure(fig, "{}_8_range_profile.png".format(DEBUG_ACTIVE_RECIEVER))
+		plt.close()
 	
 	
 	return yt
@@ -609,7 +677,9 @@ def generate_1D_image_sim():
 	matplotlib.figure.Figure
 		1D range profile image
 	"""
-
+	
+	global DEBUG_ACTIVE_RECIEVER; DEBUG_ACTIVE_RECIEVER =0
+	
 	two_way_delay_to_targets = []
 	
 	for target in target_coords:
@@ -646,7 +716,9 @@ def generate_1D_image():
 	matplotlib.figure.Figure
 		1D range profile image
 	"""
-
+	
+	global DEBUG_ACTIVE_RECIEVER; DEBUG_ACTIVE_RECIEVER =0
+	
 	# dictionary stores all sonar data
 	dict = teensy_interface.request_sonar_data()
 	
@@ -667,7 +739,7 @@ def generate_1D_image():
 	splot.plot(s,abs(yt),linewidth=0.7, color="#2da6f7")
 	splot.set_xlabel("d [m]")
 	splot.set_ylabel("{}".format("|y(t)|"))
-	plt.show()
+	#plt.show()
 
 	return fig
 
@@ -798,7 +870,9 @@ def generate_2D_image_sim():
 	matplotlib.figure.Figure
 		2D sonar image
 	"""
-
+	
+	global DEBUG_ACTIVE_RECIEVER; DEBUG_ACTIVE_RECIEVER = 0
+	
 	# holds processed range profiles from each reciever
 	range_profiles = [] 
 	
@@ -811,6 +885,7 @@ def generate_2D_image_sim():
 			two_way_delay_to_targets.append(two_way_delay)
 			
 		range_profiles.append(produce_range_profile_sim(two_way_delay_to_targets))
+		DEBUG_ACTIVE_RECIEVER+=1
 	
 	# form 2D array from range_profiles for 2D image
 	z = coherent_summing(range_profiles)
@@ -836,6 +911,7 @@ def generate_2D_image():
 		2D sonar image
 	"""
 	
+	global DEBUG_ACTIVE_RECIEVER; DEBUG_ACTIVE_RECIEVER =0
 	
 	# dictionary stores all sonar data
 	dict = teensy_interface.request_sonar_data()
@@ -857,13 +933,13 @@ def generate_2D_image():
 	# generate range profile for each receiver using sonar data
 	for reciever in dict:
 		range_profiles.append(produce_range_profile(dict[reciever]))
+		DEBUG_ACTIVE_RECIEVER+=1
 	
 	# form 2D array from range_profiles for 2D image
 	z = coherent_summing(range_profiles)
 	
 	# return the 2D sonar image
 	return plot_2D_image(z)
-
 
 
 # -------------------------------------------------------------------------------------- #
@@ -935,8 +1011,44 @@ def change_sample_rate(new_sample_rate, num_samples):
 		f_axis =  np.linspace(-N/2, N/2-1, N)*Δf;
 	else:   # case N odd
 		f_axis = np.linspace(-(N-1)/2, (N-1)/2, N)*Δf;  
+
+
+
+def set_debug_mode(value):
+	global DEBUG_MODE_ACTIVE;
+	DEBUG_MODE_ACTIVE = value;
+
+
+
+def save_figure(fig, filename):
+	"""Save a figure from pyplot.
 	
+	Parameters
+	----------
+	path : string
+		The path (and filename, with the extension) to save the figure to.
+		
+	"""
 	
+	# Create new directory
+	output_dir = "debug"
+	mkdir_p(output_dir)
+	fullpath = '{}/{}'.format(output_dir, filename)
+	fig.savefig(fullpath, dpi=150, bbox_inches="tight")
+
+
+def mkdir_p(mypath):
+	"""Creates a directory. equivalent to using mkdir -p on the command line"""
+	
+	from errno import EEXIST
+	from os import makedirs,path
+	
+	try:
+		makedirs(mypath)
+	except OSError as exc: # Python >2.5
+		if (exc.errno == EEXIST and path.isdir(mypath)):
+			pass
+		else: raise
 
 # ====================================== MAIN ========================================== #
 
@@ -947,8 +1059,21 @@ if __name__ == "__main__":
 	start_time_millis = time.time()
 	start_time_fmt = time.strftime("%H:%M:%S", time.localtime())
 	
-	range_profiles = generate_all_range_profiles_sim()
-	#z = coherent_summing(range_profiles)
+	# holds processed range profiles from each reciever
+	range_profiles = [] 
+	
+	# generate simulation data for each receiver and then range profile
+	for reciever in reciever_coords:
+		two_way_delay_to_targets = []
+		for target in target_coords:
+			two_way_dist = calc_dist_polar(transmit_coord, target) + calc_dist_polar(target, reciever)
+			two_way_delay = two_way_dist/c
+			two_way_delay_to_targets.append(two_way_delay)
+			
+		range_profiles.append(produce_range_profile_sim(two_way_delay_to_targets))
+		DEBUG_ACTIVE_RECIEVER+=1
+	
+	# form 2D array from range_profiles for 2D image
 	z = coherent_summing(range_profiles)
 	
 	end_time_millis = time.time()
@@ -959,7 +1084,7 @@ if __name__ == "__main__":
 	"""
 	
 	
-	
+	"""
 	start_time_millis = time.time()
 	start_time_fmt = time.strftime("%H:%M:%S", time.localtime())
 	
@@ -975,11 +1100,10 @@ if __name__ == "__main__":
 	print("Runtime info: starttime={}, runtime={}s".format(start_time_fmt,round(runtime,2)))
 	
 	plot_2D_image(z)
+	"""
 	
 	
-	"""
-	generate_1D_image();
-	"""
+	generate_1D_image_sim();
 	
 
 

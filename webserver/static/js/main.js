@@ -3,6 +3,8 @@ var continuousMode = false;
 var running = false;
 var stopInterrupt = false;
 var isMicroConnected = false;
+var debuggingState = "off"; // options are off, waiting, on
+var numReceivers = 8;
 
 
 //runs once page has loaded - to ensure some UI indicators update straight away
@@ -23,15 +25,14 @@ function loadMainplot() {
 		var is_1D_mode = displayRadios[0].checked //true if continuous mode at radios[1] is selected
 		
 		var isSimMode = document.getElementById('chk_sim_mode').checked
-	
-		if(is_1D_mode && isSimMode){
-			img.src="sonar_image_1D.png?sim_mode=true&rand_number=" + val // random number forces browser to reload image
-		} else if(is_1D_mode && !isSimMode){
-			img.src="sonar_image_1D.png?sim_mode=false&rand_number=" + val // random number forces browser to reload image
-		} else if(!is_1D_mode && isSimMode){
-			img.src="sonar_image_2D.png?sim_mode=true&rand_number=" + val // random number forces browser to reload image
-		}else{
-			img.src="sonar_image_2D.png?sim_mode=false&rand_number=" + val // random number forces browser to reload image
+		var isDebugMode = document.getElementById('debugCheck').checked
+
+		var urlArguments = "sim_mode="+isSimMode+"&debug_mode="+isDebugMode+"&rand_number="+val // random number forces browser to reload image
+
+		if(is_1D_mode){
+			img.src="sonar_image_1D.png?" + urlArguments
+		} else{
+			img.src="sonar_image_2D.png?" + urlArguments 
 		}
 
 		
@@ -43,6 +44,13 @@ function loadMainplot() {
     		document.getElementById("label_refresh_rate").innerHTML = runtime/1000.0 + " s";
     		document.getElementById("label_refresh_rate").classList.remove('badge-secondary');
 			document.getElementById("label_refresh_rate").classList.add('badge-info');
+			
+			var isDebugMode = document.getElementById('debugCheck').checked
+			
+			//only load debug plots if in debug mode
+			if(isDebugMode){
+				loadDebugplots()
+			}
     		
   			//if in continuous mode keep running
   			if(continuousMode && !stopInterrupt){
@@ -64,6 +72,96 @@ function loadMainplot() {
 		*/
 		  		
 }
+
+
+function loadDebugplots() {
+	
+	val = Math.random(); 
+	
+	var displayRadios = document.getElementsByName("radio_display_mode");
+	var is_1D_mode = displayRadios[0].checked //true if continuous mode at radios[1] is selected
+	
+	
+	for(var i = 0; i< numReceivers; i++){
+		
+		// stop early if in 1D mode
+		if(is_1D_mode && i>0){
+			break;
+		}
+		
+		var debugplot_chirp = document.getElementById("debugplot_"+i+"_chirp");
+		var debugplot_receive = document.getElementById("debugplot_"+i+"_receive");
+		var debugplot_inverse_filter = document.getElementById("debugplot_"+i+"_inverse_filter");
+		var debugplot_analytic = document.getElementById("debugplot_"+i+"_analytic");
+		var debugplot_window = document.getElementById("debugplot_"+i+"_window");
+		var debugplot_baseband = document.getElementById("debugplot_"+i+"_baseband");
+		var debugplot_range_comp = document.getElementById("debugplot_"+i+"_range_comp");
+		var debugplot_range_profile = document.getElementById("debugplot_"+i+"_range_profile");
+		
+		
+		debugplot_chirp.src = "debug?plotname="+i+"_1_chirp.png&rand_number=" + val
+		debugplot_receive.src = "debug?plotname="+i+"_2_receive.png&rand_number=" + val
+		debugplot_inverse_filter.src = "debug?plotname="+i+"_3_inverse_filter.png&rand_number=" + val
+		debugplot_analytic.src = "debug?plotname="+i+"_4_analytic.png&rand_number=" + val
+		debugplot_window.src = "debug?plotname="+i+"_5_window.png&rand_number=" + val
+		debugplot_baseband.src = "debug?plotname="+i+"_6_baseband.png&rand_number=" + val
+		debugplot_range_comp.src = "debug?plotname="+i+"_7_range_comp.png&rand_number=" + val
+		debugplot_range_profile.src = "debug?plotname="+i+"_8_range_profile.png&rand_number=" + val
+	}
+	
+	
+	//when the first debug plot arrives, show all plots
+	document.getElementById("debugplot_0_chirp").onload = function() {
+		var debuggerView = document.getElementById("debuggerView");
+		var debuggerWaitingMsg = document.getElementById("debuggerWaitingMsg");
+		
+		var debuggerOutputRec0 = document.getElementById("debuggerOutput-reciever0");
+		var debuggerOutputRemRec = document.getElementById("debuggerOutput-remainingRecievers");
+	
+		debuggerView.style.display = "block";
+		debuggerWaitingMsg.style.display = "none";
+		
+		if(is_1D_mode){
+			debuggerOutputRec0.style.display = "block";
+			debuggerOutputRemRec.style.display = "none";
+		}else{
+			debuggerOutputRec0.style.display = "block";
+			debuggerOutputRemRec.style.display = "block";
+		}
+		
+	
+		debuggingState = "on"
+	}
+	
+	
+	
+
+}
+
+//when debug checkbox is checked
+document.getElementById("debugCheck").addEventListener("click", function(){
+
+	var debuggerView = document.getElementById("debuggerView");
+	var debuggerWaitingMsg = document.getElementById("debuggerWaitingMsg");
+	
+	var debuggerOutputRec0 = document.getElementById("debuggerOutput-reciever0");
+	var debuggerOutputRemRec = document.getElementById("debuggerOutput-remainingRecievers");
+	
+	
+	if (debuggingState === "off") {
+		debuggingState = "waiting"
+		debuggerView.style.display = "block";
+		debuggerWaitingMsg.style.display = "block";
+		
+		debuggerOutputRec0.style.display = "none";
+		debuggerOutputRemRec.style.display = "none";
+		
+	} else {
+		debuggingState = "off"
+		debuggerView.style.display = "none";
+	}
+});
+
 
 //when Run button is pressed 
 document.getElementById("btn_run").addEventListener("click", function(){

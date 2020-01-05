@@ -161,7 +161,7 @@
 						</div>
 						<div class="col-6">
       						<div class="form-check">
-  								<input class="form-check-input" type="checkbox" value="" id="defaultCheck2">
+  								<input class="form-check-input" type="checkbox" value="" id="debugCheck">
   							</div>
 						</div>
 					</div>
@@ -170,6 +170,317 @@
     		</div>
 
   		</div>
+  		
+  	</div>
+  		
+  	<div id="debuggerView" class="container mt-5" style="display:none">
+  		<div  class="row mt-5">
+			<div class="col-12 mt-5">
+				<hr>
+    			<h4> Debugger output</h4>
+    		</div>
+  		</div>
+  		
+  		<div id="debuggerWaitingMsg">
+			<div class="row">
+				<div class="col-12">
+					<p> The next time 'Run' is pressed, debugger output will be shown here </p>
+				</div>
+			</div>
+		</div>
+		
+		<div id="debuggerOutput-reciever0">
+			<div class="row">
+				<div class="col-12">
+					<p> Receiver 0</p>
+				</div>
+			</div>
+			<div class="row mt-3">
+				<div class="col-3">
+					<img id="debugplot_0_chirp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_0_receive" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_0_inverse_filter" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_0_analytic" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			<div class="row mt-3">
+			
+				<div class="col-3">
+					<img id="debugplot_0_window" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_0_baseband" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_0_range_comp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_0_range_profile" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+		</div>
+			
+		<div id="debuggerOutput-remainingRecievers">
+			<div class="row mt-5">
+				<div class="col-12">
+					<p> Receiver 1</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-3">
+					<img id="debugplot_1_chirp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_1_receive" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_1_inverse_filter" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_1_analytic" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			<div class="row mt-3">
+			
+				<div class="col-3">
+					<img id="debugplot_1_window" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_1_baseband" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_1_range_comp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_1_range_profile" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			
+			
+			<div class="row mt-5">
+				<div class="col-12">
+					<p> Receiver 2</p>
+				</div>
+			</div>
+			<div class="row ">
+				<div class="col-3">
+					<img id="debugplot_2_chirp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_2_receive" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_2_inverse_filter" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_2_analytic" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			<div class="row mt-3">
+			
+				<div class="col-3">
+					<img id="debugplot_2_window" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_2_baseband" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_2_range_comp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_2_range_profile" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			
+			
+			<div class="row mt-5">
+				<div class="col-12">
+					<p> Receiver 3</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-3">
+					<img id="debugplot_3_chirp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_3_receive" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_3_inverse_filter" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_3_analytic" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			<div class="row mt-3">
+			
+				<div class="col-3">
+					<img id="debugplot_3_window" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_3_baseband" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_3_range_comp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_3_range_profile" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			
+			
+			<div class="row mt-5" >
+				<div class="col-12">
+					<p> Receiver 4</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-3">
+					<img id="debugplot_4_chirp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_4_receive" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_4_inverse_filter" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_4_analytic" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			<div class="row mt-3">
+			
+				<div class="col-3">
+					<img id="debugplot_4_window" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_4_baseband" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_4_range_comp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_4_range_profile" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			
+			
+			
+			<div class="row mt-5">
+				<div class="col-12">
+					<p> Receiver 5</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-3">
+					<img id="debugplot_5_chirp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_5_receive" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_5_inverse_filter" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_5_analytic" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			<div class="row mt-3">
+			
+				<div class="col-3">
+					<img id="debugplot_5_window" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_5_baseband" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_5_range_comp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_5_range_profile" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			
+			
+			
+			<div class="row mt-5">
+				<div class="col-12">
+					<p> Receiver 6</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-3">
+					<img id="debugplot_6_chirp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_6_receive" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_6_inverse_filter" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_6_analytic" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			<div class="row mt-3">
+			
+				<div class="col-3">
+					<img id="debugplot_6_window" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_6_baseband" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_6_range_comp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_6_range_profile" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			
+			
+			<div class="row mt-5">
+				<div class="col-12">
+					<p> Receiver 7</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-3">
+					<img id="debugplot_7_chirp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_7_receive" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_7_inverse_filter" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_7_analytic" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+			<div class="row mt-3">
+			
+				<div class="col-3">
+					<img id="debugplot_7_window" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_7_baseband" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_7_range_comp" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+				<div class="col-3">
+					<img id="debugplot_7_range_profile" class="figure-img img-fluid rounded" src="" alt="could not load image"> 
+				</div>
+			</div> 
+		</div>
+
 	</div>
     
 

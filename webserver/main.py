@@ -38,6 +38,15 @@ def refresh():
 def sonar_image_2D_process():
 
 	try:
+	
+		#determine if in debug mode
+		debug_mode = request.args.get('debug_mode')
+	
+		if(debug_mode=="true"):
+			sp.set_debug_mode(True)
+		else:
+			sp.set_debug_mode(False)
+		
 		#determine if in simulation mode (ie no micro)
 		sim_mode = request.args.get('sim_mode')
 	
@@ -58,6 +67,16 @@ def sonar_image_2D_process():
 def sonar_image_1D_process():
 	
 	try:
+	
+		#determine if in debug mode
+		debug_mode = request.args.get('debug_mode')
+	
+		if(debug_mode=="true"):
+			sp.set_debug_mode(True)
+		else:
+			sp.set_debug_mode(False)
+		
+		
 		#determine if in simulation mode (ie no micro)
 		sim_mode = request.args.get('sim_mode')
 	
@@ -74,6 +93,13 @@ def sonar_image_1D_process():
 	
 	except TeensyError:
 		return send_file("static/images/micro_error.png", mimetype='image/gif')
+
+
+@app.route('/debug')
+def debug_image_process():
+	plotname = request.args.get('plotname')
+	filepath = "debug/"+plotname
+	return send_file(filepath, mimetype='image/gif')
 
 @app.route("/micro_status", methods=['POST'])
 def micro_status_process():
