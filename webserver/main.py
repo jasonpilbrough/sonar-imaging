@@ -108,7 +108,7 @@ def sonar_image_2D_process():
 @app.route('/debug')
 def debug_image_process():
 	plotname = request.args.get('plotname')
-	filepath = "debug/"+plotname
+	filepath = "../signal_processing/debug/"+plotname
 	return send_file(filepath, mimetype='image/gif')
 
 @app.route("/micro_status", methods=['POST'])

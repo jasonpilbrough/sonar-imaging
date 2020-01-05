@@ -1,11 +1,52 @@
 body {
-  font-family: 'Montserrat', sans-serif;
+
 }
 
 .logo {
   background-color: #0D122B;
   padding: 10px;
   color: white;
+}
+
+.text-s{
+	font-size: 1rem;
+}
+
+.text-xs{
+	font-size: 0.8rem;
+}
+
+.text-center{
+	text-align:center;
+	width:100%;
+}
+
+.full-width{
+	width: 100%;
+}
+
+.toggle-handle{
+	background-color: white;
+}
+
+.btn-secondary:not(:disabled):not(.disabled):active, .btn-secondary:not(:disabled):not(.disabled).active,
+.show > .btn-secondary.dropdown-toggle {
+	background-color: inherit;
+}
+
+.btn-info:not(:disabled):not(.disabled):active, .btn-info:not(:disabled):not(.disabled).active, 
+.show > .btn-info.dropdown-toggle {
+	background-color: inherit;
+}
+
+.btn-success:not(:disabled):not(.disabled):active, .btn-success:not(:disabled):not(.disabled).active, 
+.show > .btn-success.dropdown-toggle {
+	background-color: inherit;
+}
+
+.center-h{
+	display: block;
+	margin: 0 auto;
 }
 
 

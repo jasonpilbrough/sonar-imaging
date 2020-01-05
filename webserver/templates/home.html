@@ -8,165 +8,148 @@
     {% extends "template.html" %}
     {% block content %}
 
-
+	
     
-    			
+    <div class="container-fluid">		
     
     <div class="container mt-4">
   		<div class="row">
     		<div class="col-8">
-    			<div class="row">
-    				<div class="col-12">
-    					<h3> Processed Sonar Image </h3>
-    				</div>
-    				
-    			</div>
-    			<div class="row">
-    				<div class="col-12">
-    					
-    					<!-- placeholder image--!>
-    					<img id=mainplot class="figure-img img-fluid rounded" src="https://dummyimage.com/670x486.662/054846/fff.png&text=[press+run+to+generate+image]" alt=" [could not load image]" >	
-    					
-    					<!-- <img id=mainplot class="figure-img img-fluid rounded" src="/plot.png" alt="my plot" width="1000" height="1000"> --!>
-      				</div>
-      			</div>      			
-      			
-    		</div>
+    			<div class="card shadow">
+    				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+						<h6 class="m-0 font-weight-bold text-gray-800"> Processed Sonar Image  </h6>
+					</div>
+					<div class="card-body">
+						<!-- placeholder image--!>
+    					<img id=mainplot class="figure-img img-fluid rounded center-h" src="https://dummyimage.com/670x486/ffffff/5a5c69&text=press+run+to+generate+an+image" alt=" [could not load image]" >	
+					</div>
+				</div>    
+			</div>			
     		<div class="col-4">
-    			<h3> Control Panel </h3>
-    			<div class="container mt-4">
-    				<div class="row">
-    					<h5> System Status</h5>
+    			<div class="card shadow">
+    				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+						<h6 class="m-0 font-weight-bold text-gray-800 "> Control Panel </h6>
 					</div>
-					<div class="row">
-						<div class="col-6">
-							Current State
+    			
+    			<div class="card-body text pt-3">
+						
+						<div class="row">
+							<div class="text-xs font-weight-bold text-gray-800 text-uppercase mb-2 text-center"> System Status</div>
 						</div>
-						<div class="col-6">
-							<span id="label_current_state" class="badge badge-secondary badge-pill">Idle</span>
+						<div class="row">
+							<div class="col-7 ">
+								Current State
+							</div>
+							<div class="col-5">
+								<span id="label_current_state" class="badge badge-secondary badge-pill full-width">Idle</span>
+							</div>
 						</div>
-					</div>
-					<div class="row">
-						<div class="col-6">
-							Server
+						<div class="row">
+							<div class="col-7">
+								Server
+							</div>
+							<div class="col-5">
+								<span id="label_server_connection" class="badge badge-success badge-pill full-width"> Connected </span>
+							</div>
 						</div>
-						<div class="col-6">
-							<span id="label_server_connection" class="badge badge-success badge-pill"> Connected </span>
+						<div class="row">
+							<div class="col-7">
+								Microcontroller
+							</div>
+							<div class="col-5">
+								<span id="label_micro_connection" class="badge badge-danger badge-pill full-width">Not Connected</span>
+							</div>
 						</div>
-					</div>
-					<div class="row">
-    					<div class="col-6">
-							Microcontroller
+						<div class="row">
+							<div class="col-7">
+								Battery Level
+							</div>
+							<div class="col-5">
+								<span class="badge badge-danger badge-pill full-width">Not Connected</span>
+							</div>
 						</div>
-						<div class="col-6">
-							<span id="label_micro_connection" class="badge badge-danger badge-pill">Not Connected</span>
+						<div class="row">
+							<div class="col-7">
+								Sampling Rate
+							</div>
+							<div class="col-5">
+								<span id="label_sample_rate" class="badge badge-secondary badge-pill full-width">N/A</span>
+							</div>
 						</div>
-					</div>
-					<div class="row">
-    					<div class="col-6">
-							Battery Level
-						</div>
-						<div class="col-6">
-							<span class="badge badge-danger badge-pill">Not Connected</span>
-						</div>
-					</div>
-					<div class="row">
-    					<div class="col-6">
-							Sampling Rate
-						</div>
-						<div class="col-6">
-							<span id="label_sample_rate" class="badge badge-info badge-pill">N/A</span>
-						</div>
-					</div>
-					<div class="row">
-    					<div class="col-6">
-							Refresh Rate
-						</div>
-						<div class="col-6">
-							<span id="label_refresh_rate" class="badge badge-secondary badge-pill">N/A</span>
-						</div>
-					</div>
-				</div>
-				<div class="container">
-					<div class="row mt-3">
-    					<h5> Controls </h5>
-					</div>
-					<div class="row">
-						<div class="col-6">
-							<button id="btn_run" type="button" class="btn btn-outline-info btn-block"> Run </button>
-						</div>
-						<div class="col-6">
-							<button id="btn_stop" type="button" class="btn btn-outline-danger btn-block"> Stop </button>
-						</div>
-					</div>
-				</div>
-				<div class="container">
-					<div class="row mt-3">
-    					<h5> Configuration </h5>
-					</div>
-					<div class="row">
-						<div class="col-6">
-							Imaging Mode
-						</div>
-						<div class="col-6">
-      						<div class="btn-group btn-group-toggle" data-toggle="buttons">
-  								<label class="btn btn-info active btn-sm">
-   									 <input type="radio" name="radio_imaging_mode" id="option1" checked> Single
-  								</label>
-  								<label class="btn btn-info btn-sm">
-    								<input type="radio" name="radio_imaging_mode" id="option2"> Continuous
-  								</label>
-  							</div>
+						<div class="row">
+							<div class="col-7">
+								Refresh Rate
+							</div>
+							<div class="col-5">
+								<span id="label_refresh_rate" class="badge badge-secondary badge-pill full-width">N/A</span>
+							</div>
 						</div>
 					</div>
 					
-					<div class="row mt-1">
-      					<div class="col-6">
-							Display Mode
+					
+					
+					<div class="container mb-4">
+						<div class="row">
+							<div class="text-xs font-weight-bold text-gray-800 text-uppercase mb-2 text-center"> Controls </div>
 						</div>
-						<div class="col-6">
-      						<div class="btn-group btn-group-toggle" data-toggle="buttons">
-  								<label class="btn btn-info active btn-sm">
-   									 <input type="radio" name="radio_display_mode" id="option1" checked> 1D
-  								</label>
-  								<label class="btn btn-info btn-sm">
-    								<input type="radio" name="radio_display_mode" id="option2"> 2D
-  								</label>
-  							</div>
-						</div>
-					</div>
-					<div class="row mt-1">
-						<div class="col-6">
-							Simulation Mode
-						</div>
-						<div class="col-6">
-      						<div class="form-check">
-  								<input id="chk_sim_mode" class="form-check-input" type="checkbox" value="" id="defaultCheck3">
+						<div class="row">
+							<div class="col-6">
+								<button id="btn_run" type="button" class="btn btn-outline-success btn-block"> Run </button>
+							</div>
+							<div class="col-6">
+								<button id="btn_stop" type="button" class="btn btn-outline-danger btn-block"> Stop </button>
 							</div>
 						</div>
 					</div>
-					<div class="row mt-1">
-						<div class="col-6">
-							Range Comp.
+					
+					
+					
+					
+					<div class="container mb-4">
+						<div class="row">
+							<div class="text-xs font-weight-bold text-gray-800 text-uppercase mb-2 text-center"> Configuration </div>
 						</div>
-						<div class="col-6">
-      						<div class="form-check">
-  								<input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
+						<div class="row mt-1">
+							<div class="col-6"> Imaging Mode </div>
+							<div class="col-6">
+								<div class="form-check">
+									<input id="imaging_mode_toggle" type="checkbox" checked data-toggle="toggle" data-width="120" data-height="20" data-size="small" data-on="Single shot" data-off="Continuous" data-onstyle="success" data-offstyle="success">
+								</div>
 							</div>
 						</div>
-					</div>
-					<div class="row mt-1">
-						<div class="col-6">
-							Debug Mode
+						
+						<div class="row mt-1">
+							<div class="col-6"> Display Mode </div>
+							<div class="col-6">
+								<div class="form-check">
+									<input id="display_mode_toggle" type="checkbox" checked data-toggle="toggle" data-width="120" data-height="20" data-size="small" data-on="1D" data-off="2D" data-onstyle="success" data-offstyle="success">
+								</div>
+							</div>
 						</div>
-						<div class="col-6">
-      						<div class="form-check">
-  								<input class="form-check-input" type="checkbox" value="" id="debugCheck">
-  							</div>
+						
+						<div class="row mt-1">
+							<div class="col-6"> Simulation Mode </div>
+							<div class="col-6">
+								<div class="form-check">
+									<input id="simulation_mode_toggle" type="checkbox" data-toggle="toggle" data-width="120" data-height="20" data-size="small" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="secondary">
+								</div>
+							</div>
 						</div>
+						
+						<div class="row mt-1">
+							<div class="col-6"> Debug Mode </div>
+							<div class="col-6">
+								<div class="form-check">
+									<input id="debug_mode_toggle" type="checkbox" data-toggle="toggle" data-width="120" data-height="20" data-size="small" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="secondary">
+								</div>
+							</div>
+						</div>
+					
+		
+						
+						
 					</div>
 				</div>
-
     		</div>
 
   		</div>
@@ -484,7 +467,7 @@
 	</div>
     
 
-
+	</div>
         
     
 

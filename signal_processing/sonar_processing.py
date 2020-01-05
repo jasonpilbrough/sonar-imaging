@@ -136,7 +136,7 @@ global transmit_coord; transmit_coord = (0.0,0.0)
 global reciever_spacing; reciever_spacing = 0.01 
 
 global reciever_coords; reciever_coords = [(reciever_spacing*3.5, 3*np.pi/2),(reciever_spacing*2.5, 3*np.pi/2),(reciever_spacing*1.5, 3*np.pi/2),(reciever_spacing*0.5, 3*np.pi/2),(reciever_spacing*0.5, np.pi/2),(reciever_spacing*1.5, np.pi/2),(reciever_spacing*2.5, np.pi/2),(reciever_spacing*3.5, np.pi/2)]
-global target_coords; target_coords = [(4,10*np.pi/180),(5,10*np.pi/180),(6,10*np.pi/180),(7,10*np.pi/180),(5.5,10*np.pi/180)]  #global target_coords; target_coords = [(5, -60*np.pi/180),(8.2,60*np.pi/180)]
+global target_coords; target_coords = [(5, 20*np.pi/180)] 						# global target_coords; target_coords = [(4,10*np.pi/180),(5,10*np.pi/180),(6,10*np.pi/180),(7,10*np.pi/180),(5.5,10*np.pi/180)] 
 
 
 # DEBUGGING 
@@ -701,8 +701,10 @@ def generate_1D_image_sim():
 		
 	yt = produce_range_profile_sim(two_way_delay_to_targets)
 		
-	#plot y(t) 
-	fig, (splot) = plt.subplots(1, 1)
+
+	fig, (splot) = plt.subplots(1, 1, figsize=(8,6))
+	plt.subplots_adjust(top=0.97,right = 0.95, left = 0.15)
+
 	splot.plot(s,abs(yt),linewidth=0.7, color="#2da6f7")
 	splot.set_xlabel("d [m]")
 	splot.set_ylabel("{}".format("|y(t)|"))
@@ -746,8 +748,9 @@ def generate_1D_image():
 	# uses reciever0 of the sonar by default
 	yt = produce_range_profile(dict["buffer0"])
 
-	#plot y(t) 
-	fig, (splot) = plt.subplots(1, 1)
+
+	fig, (splot) = plt.subplots(1, 1, figsize=(8,6))
+	plt.subplots_adjust(top=0.97, right = 0.95, left = 0.15)
 	splot.plot(s,abs(yt),linewidth=0.7, color="#2da6f7")
 	splot.set_xlabel("d [m]")
 	splot.set_ylabel("{}".format("|y(t)|"))

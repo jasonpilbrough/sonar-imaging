@@ -21,11 +21,13 @@ function loadMainplot() {
 		val = Math.random(); 
 		img = document.getElementById("mainplot");
 		
-		var displayRadios = document.getElementsByName("radio_display_mode");
-		var is_1D_mode = displayRadios[0].checked //true if continuous mode at radios[1] is selected
+		var is_1D_mode = document.getElementById("display_mode_toggle").checked
 		
-		var isSimMode = document.getElementById('chk_sim_mode').checked
-		var isDebugMode = document.getElementById('debugCheck').checked
+		//var displayRadios = document.getElementsByName("radio_display_mode");
+		//var is_1D_mode = displayRadios[0].checked //true if continuous mode at radios[1] is selected
+		
+		var isSimMode = document.getElementById("simulation_mode_toggle").checked
+		var isDebugMode = document.getElementById('debug_mode_toggle').checked
 
 		var urlArguments = "sim_mode="+isSimMode+"&debug_mode="+isDebugMode+"&rand_number="+val // random number forces browser to reload image
 
@@ -43,9 +45,9 @@ function loadMainplot() {
     		var runtime = new Date() - globaltime
     		document.getElementById("label_refresh_rate").innerHTML = runtime/1000.0 + " s";
     		document.getElementById("label_refresh_rate").classList.remove('badge-secondary');
-			document.getElementById("label_refresh_rate").classList.add('badge-info');
+			document.getElementById("label_refresh_rate").classList.add('badge-success');
 			
-			var isDebugMode = document.getElementById('debugCheck').checked
+			var isDebugMode = document.getElementById('debug_mode_toggle').checked
 			
 			//only load debug plots if in debug mode
 			if(isDebugMode){
@@ -78,9 +80,8 @@ function loadDebugplots() {
 	
 	val = Math.random(); 
 	
-	var displayRadios = document.getElementsByName("radio_display_mode");
-	var is_1D_mode = displayRadios[0].checked //true if continuous mode at radios[1] is selected
 	
+	var is_1D_mode = document.getElementById("display_mode_toggle").checked
 	
 	for(var i = 0; i< numReceivers; i++){
 		
@@ -138,10 +139,10 @@ function loadDebugplots() {
 
 }
 
-//when debug checkbox is checked
-document.getElementById("debugCheck").addEventListener("click", function(){
 
-	var debuggerView = document.getElementById("debuggerView");
+
+$('#debug_mode_toggle').change(function() {
+    var debuggerView = document.getElementById("debuggerView");
 	var debuggerWaitingMsg = document.getElementById("debuggerWaitingMsg");
 	
 	var debuggerOutputRec0 = document.getElementById("debuggerOutput-reciever0");
@@ -160,16 +161,16 @@ document.getElementById("debugCheck").addEventListener("click", function(){
 		debuggingState = "off"
 		debuggerView.style.display = "none";
 	}
-});
-
-
+})
+    
+    
+    
 //when Run button is pressed 
 document.getElementById("btn_run").addEventListener("click", function(){
 
 	loadMainplot();
 	
-	var radios = document.getElementsByName("radio_imaging_mode");
-	continuousMode = radios[1].checked //true if continuous mode at radios[1] is selected
+	continuousMode = !document.getElementById("imaging_mode_toggle").checked
 	running = true;
 	
 	if(continuousMode){
@@ -252,11 +253,11 @@ function testMicroStatus() {
 				}
 		
 				if(sample_rate==="N/A"){
-					document.getElementById("label_sample_rate").classList.remove('badge-info');
+					document.getElementById("label_sample_rate").classList.remove('badge-success');
 					document.getElementById("label_sample_rate").classList.add('badge-secondary');
 				} else{
 					document.getElementById("label_sample_rate").classList.remove('badge-secondary');
-					document.getElementById("label_sample_rate").classList.add('badge-info');
+					document.getElementById("label_sample_rate").classList.add('badge-success');
 				}
 		
 		
@@ -274,8 +275,14 @@ function testMicroStatus() {
 			document.getElementById("label_micro_connection").classList.remove('badge-success');
 			document.getElementById("label_micro_connection").classList.add('badge-danger');
 			document.getElementById("label_sample_rate").innerHTML = "N/A";
-			document.getElementById("label_sample_rate").classList.remove('badge-info');
+			document.getElementById("label_sample_rate").classList.remove('badge-success');
 			document.getElementById("label_sample_rate").classList.add('badge-secondary');
+			
+			running = false;
+			document.getElementById("label_current_state").innerHTML = "Idle";
+			document.getElementById("label_current_state").classList.remove('badge-success');
+			document.getElementById("label_current_state").classList.remove('badge-danger');
+			document.getElementById("label_current_state").classList.add('badge-secondary');
 		}
 		});
 	}
@@ -284,6 +291,33 @@ function testMicroStatus() {
 
 
 
+/*
+
+//when debug checkbox is checked
+document.getElementById("debugCheck").addEventListener("click", function(){
+
+	var debuggerView = document.getElementById("debuggerView");
+	var debuggerWaitingMsg = document.getElementById("debuggerWaitingMsg");
+	
+	var debuggerOutputRec0 = document.getElementById("debuggerOutput-reciever0");
+	var debuggerOutputRemRec = document.getElementById("debuggerOutput-remainingRecievers");
+	
+	
+	if (debuggingState === "off") {
+		debuggingState = "waiting"
+		debuggerView.style.display = "block";
+		debuggerWaitingMsg.style.display = "block";
+		
+		debuggerOutputRec0.style.display = "none";
+		debuggerOutputRemRec.style.display = "none";
+		
+	} else {
+		debuggingState = "off"
+		debuggerView.style.display = "none";
+	}
+});
+
+*/
 
 
 
