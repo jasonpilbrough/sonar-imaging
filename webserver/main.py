@@ -14,6 +14,7 @@ import random
 from flask import Response
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 
 
 app = Flask(__name__)
@@ -32,36 +33,7 @@ def about():
 @app.route("/refresh")
 def refresh():
 	return render_template("home.html")
-    
 
-@app.route('/sonar_image_2D.png')
-def sonar_image_2D_process():
-
-	try:
-	
-		#determine if in debug mode
-		debug_mode = request.args.get('debug_mode')
-	
-		if(debug_mode=="true"):
-			sp.set_debug_mode(True)
-		else:
-			sp.set_debug_mode(False)
-		
-		#determine if in simulation mode (ie no micro)
-		sim_mode = request.args.get('sim_mode')
-	
-		if(sim_mode=="true"):
-			fig = sp.generate_2D_image_sim() # call 2D signal processing routine
-		else:
-			# will raise format error if micro not connected
-			fig = sp.generate_2D_image() # call 2D signal processing routine
-	
-		output = io.BytesIO()
-		FigureCanvas(fig).print_png(output)
-		return Response(output.getvalue(), mimetype='image/png')
-	
-	except TeensyError:
-		return send_file("static/images/micro_error.png", mimetype='image/gif')
 
 @app.route('/sonar_image_1D.png')
 def sonar_image_1D_process():
@@ -88,7 +60,45 @@ def sonar_image_1D_process():
 	
 		output = io.BytesIO()
 		FigureCanvas(fig).print_png(output)
+		
+		# Very important to close figure as not closed by automatically
+		plt.close()
 	
+		return Response(output.getvalue(), mimetype='image/png')
+	
+	except TeensyError:
+		return send_file("static/images/micro_error.png", mimetype='image/gif')
+
+
+
+@app.route('/sonar_image_2D.png')
+def sonar_image_2D_process():
+
+	try:
+	
+		#determine if in debug mode
+		debug_mode = request.args.get('debug_mode')
+	
+		if(debug_mode=="true"):
+			sp.set_debug_mode(True)
+		else:
+			sp.set_debug_mode(False)
+		
+		#determine if in simulation mode (ie no micro)
+		sim_mode = request.args.get('sim_mode')
+	
+		if(sim_mode=="true"):
+			fig = sp.generate_2D_image_sim() # call 2D signal processing routine
+		else:
+			# will raise format error if micro not connected
+			fig = sp.generate_2D_image() # call 2D signal processing routine
+	
+		output = io.BytesIO()
+		FigureCanvas(fig).print_png(output)
+		
+		# Very important to close figure as not closed by automatically
+		plt.close()
+		
 		return Response(output.getvalue(), mimetype='image/png')
 	
 	except TeensyError:
