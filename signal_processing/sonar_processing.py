@@ -404,7 +404,7 @@ def to_analytic_signal(Xw):
 	return yt, Yw
 	
 
-def apply_window_function(Xw, window_B, window_fc):
+def apply_window_function(Xw):
 	"""Apply window function to signal to reduce sidelobes.
 	
 	Multipying a signal by a window function after having undergone pulse compression will 
@@ -588,7 +588,7 @@ def produce_range_profile_sim(td_targets):
 	vt, Vw = simulate_recieve_signal(td_targets)
 	yt, Yw = pulse_compression(Xw, Vw)
 	yt, Yw = to_analytic_signal(Yw)
-	yt, Yw = apply_window_function(Yw,2000,40000)
+	yt, Yw = apply_window_function(Yw)
 	yt, Yw = to_baseband(yt)
 	yt, Yw = range_compensation(yt)
 	
@@ -638,7 +638,7 @@ def produce_range_profile(samples):
 	vt, Vw = prepare_recieve_signal(np.asarray(samples)) #NB must convert to numpy array
 	yt, Yw = pulse_compression(Xw, Vw)
 	yt, Yw = to_analytic_signal(Yw)
-	yt, Yw = apply_window_function(Yw,2000,40000)
+	yt, Yw = apply_window_function(Yw)
 	yt, Yw = to_baseband(yt)
 	yt, Yw = range_compensation(yt)
 	
