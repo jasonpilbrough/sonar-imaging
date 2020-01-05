@@ -9,7 +9,7 @@ var numReceivers = 8;
 
 //runs once page has loaded - to ensure some UI indicators update straight away
 document.addEventListener("DOMContentLoaded", function(){
-    testInternetConnection()
+    //testInternetConnection()
     testMicroStatus()
 });
 
@@ -195,6 +195,8 @@ document.getElementById("btn_stop").addEventListener("click", function(){
 
 });
 
+
+/*
 //check internet connection every 10s and update UI indicator
 var intervalInternetID = setInterval(testInternetConnection, 10000);
 function testInternetConnection() {
@@ -209,49 +211,75 @@ function testInternetConnection() {
     	document.getElementById("label_internet_connection").classList.add('badge-danger');
     } 
 }
+*/
 
 
 //check micro every 10s and update UI indicator
 var intervalMicroID = setInterval(testMicroStatus, 10000);
 function testMicroStatus() {
+
 	//dont check micro status if system is running
 	if(!running){
-   		$.ajax({
+		$.ajax({
 		type : "POST",
 		url : '/micro_status',
 		dataType: "json",
 		data: JSON.stringify("you can put in a variable in here to send data with the request"),
 		contentType: 'application/json;charset=UTF-8',
 		success: function (data) {
-			
+		
 				var micro_connection = data["connection"];
 				var sample_rate = data["sample_rate"];
-			
+		
 				document.getElementById("label_micro_connection").innerHTML = micro_connection; 
 				document.getElementById("label_sample_rate").innerHTML = sample_rate;
-			
+				
+				
+				//if this request is successful - server must be connected
+				document.getElementById("label_server_connection").innerHTML = "Connected";
+    			document.getElementById("label_server_connection").classList.remove('badge-danger');
+    			document.getElementById("label_server_connection").classList.add('badge-success');
+		
+		
 				if(micro_connection==="Connected"){
 					isMicroConnected = true;
 					document.getElementById("label_micro_connection").classList.remove('badge-danger');
-    				document.getElementById("label_micro_connection").classList.add('badge-success');
+					document.getElementById("label_micro_connection").classList.add('badge-success');
 				}else{
 					isMicroConnected = false;
-    				document.getElementById("label_micro_connection").classList.remove('badge-success');
+					document.getElementById("label_micro_connection").classList.remove('badge-success');
 					document.getElementById("label_micro_connection").classList.add('badge-danger');
 				}
-			
+		
 				if(sample_rate==="N/A"){
 					document.getElementById("label_sample_rate").classList.remove('badge-info');
-    				document.getElementById("label_sample_rate").classList.add('badge-secondary');
+					document.getElementById("label_sample_rate").classList.add('badge-secondary');
 				} else{
 					document.getElementById("label_sample_rate").classList.remove('badge-secondary');
-    				document.getElementById("label_sample_rate").classList.add('badge-info');
+					document.getElementById("label_sample_rate").classList.add('badge-info');
 				}
-			
-			
-			}	
+		
+		
+			},
+		error: function(XMLHttpRequest, textStatus, errorThrown) { 
+		
+			//server not connected	
+			document.getElementById("label_server_connection").innerHTML = "Not Connected";
+    		document.getElementById("label_server_connection").classList.remove('badge-success');
+    		document.getElementById("label_server_connection").classList.add('badge-danger');
+    		
+    		//assume micro isnt connected
+			isMicroConnected = false;
+			document.getElementById("label_micro_connection").innerHTML = "Not Connected"; 	
+			document.getElementById("label_micro_connection").classList.remove('badge-success');
+			document.getElementById("label_micro_connection").classList.add('badge-danger');
+			document.getElementById("label_sample_rate").innerHTML = "N/A";
+			document.getElementById("label_sample_rate").classList.remove('badge-info');
+			document.getElementById("label_sample_rate").classList.add('badge-secondary');
+		}
 		});
 	}
+
 }
 
 
