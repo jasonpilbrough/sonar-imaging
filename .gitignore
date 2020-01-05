@@ -2,3 +2,5 @@
 webserver/virtual/
 sandbox/
 signal_processing/__pycache__/
+webserver/debug
+signal_processing/debug
