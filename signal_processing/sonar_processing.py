@@ -117,7 +117,7 @@ else:   # case N odd
 
 # define radial axis, and azimuth axis  
 global rad; rad = np.linspace(0, r_max, 150)
-global azm; azm = np.linspace(-np.pi/4, np.pi/4, 160)
+global azm; azm = np.linspace(-np.pi/6, np.pi/6, 160)
 
 # the origin (0,0) is defined as the location of the transmitter 
 global transmit_coord; transmit_coord = (0.0,0.0)
@@ -558,6 +558,17 @@ def to_baseband(xt):
 	
 	return yt, Yw
 
+def phase_compensation(xt):
+
+	#phase compensation factors for each receiver in radians
+	comp_factors = [2.0, -2.1, 2.6, 2.7, -2.1, -2.2, 3.0, -0.7]
+	yt = xt * np.exp(1j*comp_factors[DEBUG_ACTIVE_RECIEVER]) 	
+	
+	fft = pyfftw.builders.fft(yt) # compute fft
+	Yw = fft() 
+	
+	return yt, Yw
+
 
 def range_compensation(xt):
 	"""Compensates for R^2 reduction in echo strength.
@@ -696,6 +707,7 @@ def produce_range_profile(samples):
 	yt, Yw = to_analytic_signal(Yw)
 	yt, Yw = apply_window_function(Yw)
 	yt, Yw = to_baseband(yt)
+	yt, Yw = phase_compensation(yt)
 	yt, Yw = range_compensation(yt)
 	
 	
@@ -912,8 +924,8 @@ def plot_2D_image(z):
 	r, th = np.meshgrid(rad, azm)
 	ax = plt.subplot(projection="polar")
 	
-	ax.set_thetamin(45) # in degrees
-	ax.set_thetamax(-45) # in degrees
+	ax.set_thetamin(30) # in degrees
+	ax.set_thetamax(-30) # in degrees
 	#ax.set_theta_offset(np.pi/2)
 	
 	plt.pcolormesh(th, r, abs(z), cmap="inferno")
