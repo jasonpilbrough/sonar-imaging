@@ -115,9 +115,13 @@ else:   # case N odd
 # transmitter is located at the origin (0,0). The receivers are spaced evenly appart 
 # forming a linear array centered on the origin, with a north-south orientation.
 
+
+# max field of view (in azimuth) measured from bore-sight in degrees
+global FIELD_OF_VIEW; FIELD_OF_VIEW = 30
+
 # define radial axis, and azimuth axis  
 global rad; rad = np.linspace(0, r_max, 150)
-global azm; azm = np.linspace(-np.pi/6, np.pi/6, 160)
+global azm; azm = np.linspace(-FIELD_OF_VIEW*np.pi/180, FIELD_OF_VIEW*np.pi/180, 150)
 
 # the origin (0,0) is defined as the location of the transmitter 
 global transmit_coord; transmit_coord = (0.0,0.0)
@@ -149,12 +153,22 @@ global DEBUG_ACTIVE_RECIEVER; DEBUG_ACTIVE_RECIEVER = 0
 
 # RECORDING RECEIVE SIGNAL
 
-# if record Rx mode is active, the received waveform will be saved in a text file. 
+# trying to detect the presence of the simulated chirp signal in the receive signal will
+# often lead to poor results - thus it is preferable to calibrate the system by recording
+# the receive echo off a strong target, and using that as the waveform to match with all
+# future receive signals. Note that the receive signal must be formatted correctly before
+# it can be used again - can use Microsoft Excel  
 
-global RECORD_RX; RECORD_RX = False
-global RX_FILENAME; RX_FILENAME = "RX_signal.txt"
+# if record Rx mode is active, the received waveform will be saved in a text file. 
+global RECORD_RX; RECORD_RX = True
+
+# if true, the recorded waveform will be read in and used for matching
 global USE_RECORDED_RX; USE_RECORDED_RX = True
-#gt = np.loadtxt("receive_signal.txt")
+
+# the file paths used to save and load the recorded signals - note save and load use
+# different files to prevent acidental overwriting
+global RX_SAVE_FILEPATH; RX_SAVE_FILEPATH = "../signal_processing/receive_signal/recorded_RX_signal.txt"
+global RX_LOAD_FILEPATH; RX_LOAD_FILEPATH = "../signal_processing/receive_signal/formatted_RX_signal3.txt"
 
 
 # =============================== FUNCTION DEFINITIONS ================================= #
@@ -176,8 +190,9 @@ def make_chirp():
 		chirp signal in frequency domain X(w)
 	"""
 	
+	# either read in a file containing the "transmitted" chirp, or create simulated one
 	if(USE_RECORDED_RX):
-		xt = np.loadtxt("RX_signal_use3.txt")
+		xt = np.loadtxt(RX_LOAD_FILEPATH)
 	else:
 		xt = rect((t - T/2)/T)*np.cos(2*np.pi*(f0*t+0.5*K*t**2))
 	
@@ -293,7 +308,7 @@ def prepare_recieve_signal(samples):
 	
 	# save receive signal as text file if in record mode (i.e. RECORD_RX == True)
 	if(RECORD_RX):
-		np.savetxt(RX_FILENAME, vt, delimiter=',')
+		np.savetxt(RX_SAVE_FILEPATH, vt, delimiter=',')
 	
 	# Dead-time compensation
 	vt = np.concatenate((vt[(len(vt)-600):len(vt)], vt[0:(len(vt)-600)]))
@@ -924,8 +939,8 @@ def plot_2D_image(z):
 	r, th = np.meshgrid(rad, azm)
 	ax = plt.subplot(projection="polar")
 	
-	ax.set_thetamin(30) # in degrees
-	ax.set_thetamax(-30) # in degrees
+	ax.set_thetamin(FIELD_OF_VIEW) # in degrees
+	ax.set_thetamax(-FIELD_OF_VIEW) # in degrees
 	#ax.set_theta_offset(np.pi/2)
 	
 	plt.pcolormesh(th, r, abs(z), cmap="inferno")
@@ -1167,15 +1182,16 @@ if __name__ == "__main__":
 	# if running this script from the terminal, it is import to switch the backend
 	plt.switch_backend("MacOSX")
 	
-	# assuming this script is run from signal_processing/ -> change debug path to debug/
+	# change filepath if run from terminal - assuming this script is run from signal_processing/
 	DEBUG_DIR = "debug"
+	RX_SAVE_FILEPATH = "receive_signal/recorded_RX_signal.txt"
+	RX_LOAD_FILEPATH = "receive_signal/formatted_RX_signal3.txt"
 	
 	# set debug mode to active by default in order to view plots
 	DEBUG_MODE_ACTIVE = True
 	
 	
 	# TEST CODE
-	
 	
 	generate_1D_image();
 	
