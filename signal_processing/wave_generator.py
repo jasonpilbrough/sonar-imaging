@@ -12,11 +12,11 @@ import time
 
 global fc; fc = 40000		# center frequency of chirp [Hz]
 global T; T = 0.005			# length of chirp [seconds]
-global fs; fs = 200000.0	# sample rate [Hz] - NB must be a float for micro to work
+global fs; fs = 500000.0	# sample rate [Hz] - NB must be a float for micro to work
 global Δt; Δt = 1/fs		# sample spacing in time domain [seconds]
 global t; t = np.linspace(0, T, T/Δt)	# time axis
 
-global B; B = 4000			# bandwidth of sonar [Hz]
+global B; B = 6000			# bandwidth of sonar [Hz]
 global K; K = B/T     		# chirp rate [Hz/s]
 global f0; f0 = fc-B/2 		# initial freq of chirp [Hz]
 global N; N = len(t)
@@ -70,7 +70,7 @@ def generate_header_file(xt):
 	f.write("#define NUM_SAMPLES {}\n".format(N))
 	f.write("static float waveformLookup[NUM_SAMPLES] = \n")
 	f.write("{\n")
-	arr_string = "{}\n".format(xt.astype(int)).replace("[","").replace("]","").replace(" ",", ").replace("\n","")
+	arr_string = "{}\n".format(np.array2string(np.asarray(xt.astype(int)),threshold=np.inf)).replace("[","").replace("]","").replace(" ",", ").replace("\n","")
 	f.write(arr_string)
 	f.write("\n};\n")
 	

@@ -42,7 +42,8 @@ volatile bool TIMER_RUNNING;
 volatile unsigned long OUTPUT_COUNTER = 0; // use volatile for shared variables
 
 //OUPUT PINS
-const int OUTPUT_PIN = 13;  // pin connected to transmitter
+const int LED_PIN = 13;  // pin connected to LED
+const int OUTPUT_PIN = A20;  // pin connected to transmitter
 
 
 void setup(){
@@ -61,6 +62,7 @@ void setup(){
 
   //configure output pins   
   pinMode(OUTPUT_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
     
   //ADC0
   adc->setAveraging(ADC_AVERAGING, ADC_0); // set number of averages
@@ -298,6 +300,7 @@ void DAC_timerInterupt() {
   }
   
   digitalWrite(OUTPUT_PIN, waveformLookup[OUTPUT_COUNTER]);
+  digitalWrite(LED_PIN, waveformLookup[OUTPUT_COUNTER]);
   OUTPUT_COUNTER = OUTPUT_COUNTER + 1; 
   
 }
