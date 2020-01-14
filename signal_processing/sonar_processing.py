@@ -151,9 +151,9 @@ global DEBUG_ACTIVE_RECIEVER; DEBUG_ACTIVE_RECIEVER = 0
 
 # if record Rx mode is active, the received waveform will be saved in a text file. 
 
-global RECORD_RX; RECORD_RX = True
+global RECORD_RX; RECORD_RX = False
 global RX_FILENAME; RX_FILENAME = "RX_signal.txt"
-global USE_RECORDED_RX; USE_RECORDED_RX = False
+global USE_RECORDED_RX; USE_RECORDED_RX = True
 #gt = np.loadtxt("receive_signal.txt")
 
 
@@ -175,8 +175,12 @@ def make_chirp():
 	numpy.ndarray
 		chirp signal in frequency domain X(w)
 	"""
-
-	xt = rect((t - T/2)/T)*np.cos(2*np.pi*(f0*t+0.5*K*t**2))
+	
+	if(USE_RECORDED_RX):
+		xt = np.loadtxt("RX_signal_use3.txt")
+	else:
+		xt = rect((t - T/2)/T)*np.cos(2*np.pi*(f0*t+0.5*K*t**2))
+	
 	fft = pyfftw.builders.fft(xt) # compute fft
 	Xw = fft() 
 	
@@ -286,14 +290,22 @@ def prepare_recieve_signal(samples):
 	"""
 	
 	vt = samples
-	fft = pyfftw.builders.fft(vt) # compute fft
-	Vw = fft() 
-	
 	
 	# save receive signal as text file if in record mode (i.e. RECORD_RX == True)
 	if(RECORD_RX):
 		np.savetxt(RX_FILENAME, vt, delimiter=',')
 	
+	# Dead-time compensation
+	vt = np.concatenate((vt[(len(vt)-600):len(vt)], vt[0:(len(vt)-600)]))
+	
+	fft = pyfftw.builders.fft(vt) # compute fft
+	Vw = fft() 
+	
+	# BPF
+	window = rect((f -fc % (N * Δf))/B)
+	Vw = Vw * (window + window[::-1]) # to account for the +'ve and -'ve freq
+	fft = pyfftw.builders.ifft(Vw) # compute inverse fft
+	vt = fft() 
 	
 	# if debug mode is active, save this intermediate figure for later inspection
 	# to plot this figure in a window (i.e not the browser), uncomment the plt.show()
@@ -345,7 +357,7 @@ def pulse_compression(Xw,Vw):
 
 	# defines a window over the bandwidth of the transmitted chirp
 	window = rect((f -fc % (N * Δf))/B)
-	
+		
 	# applies inverse filter to received signal 
 	Yw = Vw/Xw * (window + window[::-1]) # to account for the +'ve and -'ve freq
 	
@@ -533,7 +545,7 @@ def to_baseband(xt):
 		
 		tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
 		tplot.set_xlabel("t [s]")
-		tplot.set_ylabel("y(t)")
+		tplot.set_ylabel("|y(t)|")
 		
 		fplot.plot(f_axis, np.fft.fftshift(abs(Yw)),linewidth=0.7, color="#2da6f7")
 		fplot.set_xlabel("f [Hz]")
@@ -620,6 +632,9 @@ def produce_range_profile_sim(td_targets):
 		range profile y(t)
 	"""
 	
+	# dont use recorded RX when in sim mode
+	global USE_RECORDED_RX; USE_RECORDED_RX = False
+	
 	xt, Xw = make_chirp()
 	vt, Vw = simulate_recieve_signal(td_targets)
 	yt, Yw = pulse_compression(Xw, Vw)
@@ -671,6 +686,9 @@ def produce_range_profile(samples):
 	numpy.ndarray
 		range profile y(t)
 	"""
+	
+	# use recorded RX when in sim mode
+	global USE_RECORDED_RX; USE_RECORDED_RX = True
 	
 	xt, Xw = make_chirp()
 	vt, Vw = prepare_recieve_signal(np.asarray(samples)) #NB must convert to numpy array
@@ -788,7 +806,7 @@ def generate_1D_image():
 	splot.plot(s,abs(yt),linewidth=0.7, color="#2da6f7")
 	splot.set_xlabel("d [m]")
 	splot.set_ylabel("{}".format("|y(t)|"))
-	#plt.show()
+	plt.show()
 
 	return fig
 
@@ -894,8 +912,8 @@ def plot_2D_image(z):
 	r, th = np.meshgrid(rad, azm)
 	ax = plt.subplot(projection="polar")
 	
-	ax.set_thetamin(25) # in degrees
-	ax.set_thetamax(-25) # in degrees
+	ax.set_thetamin(45) # in degrees
+	ax.set_thetamax(-45) # in degrees
 	#ax.set_theta_offset(np.pi/2)
 	
 	plt.pcolormesh(th, r, abs(z), cmap="inferno")
@@ -1024,7 +1042,7 @@ def generate_noise():
 	
 	noise = np.random.normal(size=N)
 	μ = 0.0 
-	σ = 0.05
+	σ = 0.01
 	noise = noise * σ + μ
 	return noise
 
@@ -1141,16 +1159,16 @@ if __name__ == "__main__":
 	DEBUG_DIR = "debug"
 	
 	# set debug mode to active by default in order to view plots
-	DEBUG_MODE_ACTIVE = False
+	DEBUG_MODE_ACTIVE = True
 	
 	
 	# TEST CODE
 	
 	
-	#generate_1D_image_sim();
+	generate_1D_image();
 	
 	
-	
+	"""
 	start_time_millis = time.time()
 	start_time_fmt = time.strftime("%H:%M:%S", time.localtime())
 	
@@ -1183,7 +1201,7 @@ if __name__ == "__main__":
 	print("Runtime info: starttime={}, runtime={}s".format(start_time_fmt,round(runtime,2)))
 	
 	plot_2D_image(z)
-	
+	"""
 	
 	
 	
