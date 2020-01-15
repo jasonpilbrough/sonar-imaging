@@ -157,7 +157,8 @@ global DEBUG_ACTIVE_RECIEVER; DEBUG_ACTIVE_RECIEVER = 0
 # often lead to poor results - thus it is preferable to calibrate the system by recording
 # the receive echo off a strong target, and using that as the waveform to match with all
 # future receive signals. Note that the receive signal must be formatted correctly before
-# it can be used again - can use Microsoft Excel  
+# it can be used again - can use Microsoft Excel. NB only record RX when in 1D mode, else
+# each receiver will overwrite the previous one  
 
 # if record Rx mode is active, the received waveform will be saved in a text file. 
 global RECORD_RX; RECORD_RX = True
@@ -574,9 +575,28 @@ def to_baseband(xt):
 	return yt, Yw
 
 def phase_compensation(xt):
+	"""Compensates for phase offset due to manufacturing error
+	
+	This step is not required for simulated data.
+	
+	
+	Parameters
+	----------
+	xt: numpy.ndarray
+		time domain signal to perform phase compensation
+	
+	Returns
+	-------
+	numpy.ndarray
+		phase compensated signal in time domain y(t)
+	numpy.ndarray
+		phase compensated signal in frequency domain Y(w)
+	"""
 
-	#phase compensation factors for each receiver in radians
+	#phase compensation factors for each receiver in radians, assumes 8 receivers
 	comp_factors = [2.0, -2.1, 2.6, 2.7, -2.1, -2.2, 3.0, -0.7]
+	
+	# apply compensation factor to current receiver
 	yt = xt * np.exp(1j*comp_factors[DEBUG_ACTIVE_RECIEVER]) 	
 	
 	fft = pyfftw.builders.fft(yt) # compute fft
@@ -1187,7 +1207,7 @@ if __name__ == "__main__":
 	RX_SAVE_FILEPATH = "receive_signal/recorded_RX_signal.txt"
 	RX_LOAD_FILEPATH = "receive_signal/formatted_RX_signal3.txt"
 	
-	# set debug mode to active by default in order to view plots
+	# set debug mode to active by default in order to view any plots
 	DEBUG_MODE_ACTIVE = True
 	
 	
