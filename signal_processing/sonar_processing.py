@@ -52,6 +52,7 @@ steps:
 	* to_analytic_signal
 	* apply_window_function
 	* to_baseband
+	* non_ideal_compensation
 	* range_compensation
 	* coherent_summing
 	
@@ -285,7 +286,8 @@ def simulate_recieve_signal(td_targets):
 
 
 def prepare_recieve_signal(samples):
-	"""Prepares the recieved signal for further processing.
+	"""Prepares the recieved signal for further processing by applying BPF centered on fc.
+	Also saves recieved waveform is RECORD_RX==true
 	
 	This function is used when recieving actual sonar data, as opposed to using simulated
 	data.
@@ -311,9 +313,6 @@ def prepare_recieve_signal(samples):
 	# save receive signal as text file if in record mode (i.e. RECORD_RX == True)
 	if(RECORD_RX):
 		np.savetxt(RX_SAVE_FILEPATH, vt, delimiter=',')
-	
-	# Dead-time compensation
-	vt = np.concatenate((vt[(len(vt)-600):len(vt)], vt[0:(len(vt)-600)]))
 	
 	fft = pyfftw.builders.fft(vt) # compute fft
 	Vw = fft() 
@@ -583,16 +582,21 @@ def to_baseband(xt):
 	
 	return yt, Yw
 
-def phase_compensation(xt):
-	"""Compensates for phase offset due to manufacturing error
+def non_ideal_compensation(xt):
+	"""Compensates for phase offset due to no ideal effects in the system. This includes
+	compensating for deadtime, phase, and gain.
 	
-	This step is not required for simulated data.
+	This step is not required for simulated data. The compensation factors for gain and 
+	phase were determined by placing a corner reflector 2m away from the sonar directly on
+	boresight. The gain and phase at the location of the target should be approximately
+	the same. If not, then the appropriate compensation factor was calculated to cause 
+	this to be true. 
 	
 	
 	Parameters
 	----------
 	xt: numpy.ndarray
-		time domain signal to perform phase compensation
+		time domain signal to perform compensation
 	
 	Returns
 	-------
@@ -601,46 +605,35 @@ def phase_compensation(xt):
 	numpy.ndarray
 		phase compensated signal in frequency domain Y(w)
 	"""
-
-	#phase compensation factors for each receiver in radians, assumes 8 receivers
-	#comp_factors = [0,0,0,0,0,0,0,0]
-	#comp_factors = [2.0, -2.1, 2.6, 2.7, -2.1, -2.2, 3.0, -0.7]
-	#comp_factors = [-0.1707, 0.5777, -0.9882,-0.9321, -2.5832, 0.4118, -0.5452, 1.9282]
-	#comp_factors = [1.3451, -2.479, 2.368, 2.429, -2.940, -2.639, 2.510, -0.977]
-	comp_factors = [1.3451, 0.3382, 2.368, 2.429, -2.940, -2.639, 2.510, -0.977]
 	
+	# DEAD-TIME COMPENSATION
+	
+	# move end portion of RX array to start to compensate for deadtime
+	xt = np.concatenate((xt[(len(xt)-410):len(xt)], xt[0:(len(xt)-410)]))
+	fft = pyfftw.builders.fft(xt) # compute fft
+	Xw = fft() 
+	
+	
+	# PHASE COMPENSATION
+
+	# phase compensation factors for each receiver in radians, assumes 8 receivers
+	phase_comp_factors = [-0.856, -1.329, 1.693, 1.054, 3.171, -2.967, 2.302, -1.429] #comp_factors = [1.3451, -2.479, 2.368, 2.429, -2.940, -2.639, 2.510, -0.977] #comp_factors = [2.0, -2.1, 2.6, 2.7, -2.1, -2.2, 3.0, -0.7] #comp_factors = [-0.1707, 0.5777, -0.9882,-0.9321, -2.5832, 0.4118, -0.5452, 1.9282] #comp_factors = [1.3451, 0.3382, 2.368, 2.429, -2.940, -2.639, 2.510, -0.977]
 	
 	# apply compensation factor to current receiver
-	yt = xt * np.exp(1j*comp_factors[DEBUG_ACTIVE_RECIEVER]) 	
-	
+	yt = xt * np.exp(1j*phase_comp_factors[DEBUG_ACTIVE_RECIEVER]) 	
 	fft = pyfftw.builders.fft(yt) # compute fft
 	Yw = fft() 
 	
+	# GAIN COMPENSATION
 	
-	if(DEBUG_MODE_ACTIVE):
-		# plot curve for each receiver on same figure
-		plt.figure(num="mag")
-		plt.plot(t,abs(yt),linewidth=0.7)
-		plt.legend(('r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7'))
-		plt.title("Combined Range Profiles - magnitude")
-		plt.xlabel("t [s]")
-		plt.ylabel("|y(t)|")
+	# gain compensation factors for each receiver in radians, assumes 8 receivers
+	gain_comp_factors = [1/0.0866,1/0.1009,1/0.07615,1/0.0839,1/0.06921,1/0.06902,1/0.0906,1/0.08533]
 	
-		plt.figure(num="phase")
-		plt.plot(t,np.angle(yt),linewidth=0.7)
-		plt.legend(('r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7'))
-		plt.title("Combined Range Profiles - phase")
-		plt.xlabel("t [s]")
-		plt.ylabel("<y(t)")
-		#plt.show(block=False)
-		
-		# save each plot if this is the last receiver
-		if(DEBUG_ACTIVE_RECIEVER==7):
-			plt.figure(num="mag")
-			save_figure(plt.gcf(), "all_profile_mags.png")
-			plt.figure(num="phase")
-			save_figure(plt.gcf(), "all_profile_phases.png")
-			plt.close()
+	#apply compensation factor to current receiver
+	yt = yt * gain_comp_factors[DEBUG_ACTIVE_RECIEVER] 	
+	fft = pyfftw.builders.fft(yt) # compute fft
+	Yw = fft() 
+	
 	
 	return yt, Yw
 
@@ -695,6 +688,34 @@ def range_compensation(xt):
 		save_figure(fig, "{}_5_comp.png".format(DEBUG_ACTIVE_RECIEVER))
 		plt.close()
 	
+	# if debug mode is active, produce a single  plot with all range profiles super 
+	# imposed for both magnitude and phase
+	if(DEBUG_MODE_ACTIVE):
+		# plot magnitude curve for each receiver on same figure
+		plt.figure(num="mag")
+		plt.plot(s,abs(yt),linewidth=0.7)
+		plt.legend(('r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7'))
+		plt.title("Combined Range Profiles - magnitude")
+		plt.xlabel("d [m]")
+		plt.ylabel("|y(t)|")
+		
+		# plot phase curve for each receiver on same figure
+		plt.figure(num="phase")
+		plt.plot(s,np.angle(yt),linewidth=0.7)
+		plt.legend(('r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7'))
+		plt.title("Combined Range Profiles - phase")
+		plt.xlabel("d [m]")
+		plt.ylabel("<y(t)")
+		plt.show(block=False)
+		
+		# save each plot if this is the last receiver
+		if(DEBUG_ACTIVE_RECIEVER==7):
+			plt.figure(num="mag")
+			save_figure(plt.gcf(), "all_profile_mags.png")
+			plt.close()
+			plt.figure(num="phase")
+			save_figure(plt.gcf(), "all_profile_phases.png")
+			plt.close()
 	
 	return yt, Yw
 
@@ -782,7 +803,7 @@ def produce_range_profile(samples):
 	yt, Yw = to_analytic_signal(Yw)
 	yt, Yw = apply_window_function(Yw)
 	yt, Yw = to_baseband(yt)
-	yt, Yw = phase_compensation(yt)
+	yt, Yw = non_ideal_compensation(yt)
 	yt, Yw = range_compensation(yt)
 	
 	
@@ -1253,9 +1274,18 @@ if __name__ == "__main__":
 	
 	# TEST CODE
 	
-	"""
-	generate_1D_image();
-	"""
+	
+	
+	start_time_millis = time.time()
+	start_time_fmt = time.strftime("%H:%M:%S", time.localtime())
+	
+	generate_2D_image()
+	#generate_1D_image();
+	
+	end_time_millis = time.time()
+	runtime = end_time_millis - start_time_millis
+	print("Runtime info: starttime={}, runtime={}s".format(start_time_fmt,round(runtime,2)))
+	
 	
 	"""
 	start_time_millis = time.time()
@@ -1293,16 +1323,6 @@ if __name__ == "__main__":
 	"""
 	
 	
-	
-	
-	start_time_millis = time.time()
-	start_time_fmt = time.strftime("%H:%M:%S", time.localtime())
-	
-	generate_2D_image()
-	
-	end_time_millis = time.time()
-	runtime = end_time_millis - start_time_millis
-	print("Runtime info: starttime={}, runtime={}s".format(start_time_fmt,round(runtime,2)))
 	
 
 
