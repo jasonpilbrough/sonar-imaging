@@ -82,6 +82,7 @@ function loadDebugplots() {
 	
 	
 	var is_1D_mode = document.getElementById("display_mode_toggle").checked
+	var isSimMode = document.getElementById("simulation_mode_toggle").checked
 	
 	var debugplot_chirp = document.getElementById("debugplot_chirp");
 	debugplot_chirp.src = "debug?plotname=_1_chirp.png&rand_number=" + val
@@ -109,6 +110,12 @@ function loadDebugplots() {
 		debugplot_range_profile.src = "debug?plotname="+i+"_6_range_profile.png&rand_number=" + val
 	}
 	
+	if(!isSimMode && !is_1D_mode){
+		var debugplot_all_profile_mags = document.getElementById("debugplot_all_profile_mags");
+		var debugplot_all_profile_phases = document.getElementById("debugplot_all_profile_phases");
+		debugplot_all_profile_mags.src = "debug?plotname=all_profile_mags.png&rand_number=" + val
+		debugplot_all_profile_phases.src = "debug?plotname=all_profile_phases.png&rand_number=" + val
+	}
 	
 	//when the first debug plot arrives, show all plots
 	document.getElementById("debugplot_chirp").onload = function() {
@@ -117,6 +124,7 @@ function loadDebugplots() {
 		
 		var debuggerOutputRec0 = document.getElementById("debuggerOutput-reciever0");
 		var debuggerOutputRemRec = document.getElementById("debuggerOutput-remainingRecievers");
+		var debuggerOutputCombinedRec = document.getElementById("debuggerOutput-combinedRecievers");
 	
 		debuggerView.style.display = "block";
 		debuggerWaitingMsg.style.display = "none";
@@ -127,7 +135,16 @@ function loadDebugplots() {
 		}else{
 			debuggerOutputRec0.style.display = "block";
 			debuggerOutputRemRec.style.display = "block";
+			
+			//only show if 2D mode and not sim
+			if(isSimMode){
+				debuggerOutputCombinedRec.style.display = "none";
+			}else{
+				debuggerOutputCombinedRec.style.display = "block";
+			}
 		}
+		
+		
 		
 	
 		debuggingState = "on"
@@ -146,6 +163,7 @@ $('#debug_mode_toggle').change(function() {
 	
 	var debuggerOutputRec0 = document.getElementById("debuggerOutput-reciever0");
 	var debuggerOutputRemRec = document.getElementById("debuggerOutput-remainingRecievers");
+	var debuggerOutputCombinedRec = document.getElementById("debuggerOutput-combinedRecievers");
 	
 	
 	if (debuggingState === "off") {
@@ -155,6 +173,7 @@ $('#debug_mode_toggle').change(function() {
 		
 		debuggerOutputRec0.style.display = "none";
 		debuggerOutputRemRec.style.display = "none";
+		debuggerOutputCombinedRec.style.display = "none";
 		
 	} else {
 		debuggingState = "off"

@@ -609,6 +609,7 @@ def phase_compensation(xt):
 	#comp_factors = [1.3451, -2.479, 2.368, 2.429, -2.940, -2.639, 2.510, -0.977]
 	comp_factors = [1.3451, 0.3382, 2.368, 2.429, -2.940, -2.639, 2.510, -0.977]
 	
+	
 	# apply compensation factor to current receiver
 	yt = xt * np.exp(1j*comp_factors[DEBUG_ACTIVE_RECIEVER]) 	
 	
@@ -616,14 +617,30 @@ def phase_compensation(xt):
 	Yw = fft() 
 	
 	
-	plt.figure(num="mag")
-	plt.plot(t,abs(yt),linewidth=0.7)
-	plt.legend(('label0', 'label1', 'label2', 'label3', 'label4', 'label5', 'label6', 'label7'))
+	if(DEBUG_MODE_ACTIVE):
+		# plot curve for each receiver on same figure
+		plt.figure(num="mag")
+		plt.plot(t,abs(yt),linewidth=0.7)
+		plt.legend(('r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7'))
+		plt.title("Combined Range Profiles - magnitude")
+		plt.xlabel("t [s]")
+		plt.ylabel("|y(t)|")
 	
-	plt.figure(num="phase")
-	plt.plot(t,np.angle(yt),linewidth=0.7)
-	plt.legend(('label0', 'label1', 'label2', 'label3', 'label4', 'label5', 'label6', 'label7'))
-	plt.show(block=False)
+		plt.figure(num="phase")
+		plt.plot(t,np.angle(yt),linewidth=0.7)
+		plt.legend(('r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7'))
+		plt.title("Combined Range Profiles - phase")
+		plt.xlabel("t [s]")
+		plt.ylabel("<y(t)")
+		#plt.show(block=False)
+		
+		# save each plot if this is the last receiver
+		if(DEBUG_ACTIVE_RECIEVER==7):
+			plt.figure(num="mag")
+			save_figure(plt.gcf(), "all_profile_mags.png")
+			plt.figure(num="phase")
+			save_figure(plt.gcf(), "all_profile_phases.png")
+			plt.close()
 	
 	return yt, Yw
 
