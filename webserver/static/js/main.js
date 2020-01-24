@@ -83,6 +83,9 @@ function loadDebugplots() {
 	
 	var is_1D_mode = document.getElementById("display_mode_toggle").checked
 	
+	var debugplot_chirp = document.getElementById("debugplot_chirp");
+	debugplot_chirp.src = "debug?plotname=_1_chirp.png&rand_number=" + val
+	
 	for(var i = 0; i< numReceivers; i++){
 		
 		// stop early if in 1D mode
@@ -90,29 +93,25 @@ function loadDebugplots() {
 			break;
 		}
 		
-		var debugplot_chirp = document.getElementById("debugplot_"+i+"_chirp");
 		var debugplot_receive = document.getElementById("debugplot_"+i+"_receive");
-		var debugplot_inverse_filter = document.getElementById("debugplot_"+i+"_inverse_filter");
-		var debugplot_analytic = document.getElementById("debugplot_"+i+"_analytic");
+		var debugplot_filter = document.getElementById("debugplot_"+i+"_filter");
 		var debugplot_window = document.getElementById("debugplot_"+i+"_window");
 		var debugplot_baseband = document.getElementById("debugplot_"+i+"_baseband");
-		var debugplot_range_comp = document.getElementById("debugplot_"+i+"_range_comp");
+		var debugplot_comp = document.getElementById("debugplot_"+i+"_comp");
 		var debugplot_range_profile = document.getElementById("debugplot_"+i+"_range_profile");
 		
 		
-		debugplot_chirp.src = "debug?plotname="+i+"_1_chirp.png&rand_number=" + val
-		debugplot_receive.src = "debug?plotname="+i+"_2_receive.png&rand_number=" + val
-		debugplot_inverse_filter.src = "debug?plotname="+i+"_3_inverse_filter.png&rand_number=" + val
-		debugplot_analytic.src = "debug?plotname="+i+"_4_analytic.png&rand_number=" + val
-		debugplot_window.src = "debug?plotname="+i+"_5_window.png&rand_number=" + val
-		debugplot_baseband.src = "debug?plotname="+i+"_6_baseband.png&rand_number=" + val
-		debugplot_range_comp.src = "debug?plotname="+i+"_7_range_comp.png&rand_number=" + val
-		debugplot_range_profile.src = "debug?plotname="+i+"_8_range_profile.png&rand_number=" + val
+		debugplot_receive.src = "debug?plotname="+i+"_1_receive.png&rand_number=" + val
+		debugplot_filter.src = "debug?plotname="+i+"_2_filter.png&rand_number=" + val
+		debugplot_window.src = "debug?plotname="+i+"_3_window.png&rand_number=" + val
+		debugplot_baseband.src = "debug?plotname="+i+"_4_baseband.png&rand_number=" + val
+		debugplot_comp.src = "debug?plotname="+i+"_5_comp.png&rand_number=" + val
+		debugplot_range_profile.src = "debug?plotname="+i+"_6_range_profile.png&rand_number=" + val
 	}
 	
 	
 	//when the first debug plot arrives, show all plots
-	document.getElementById("debugplot_0_chirp").onload = function() {
+	document.getElementById("debugplot_chirp").onload = function() {
 		var debuggerView = document.getElementById("debuggerView");
 		var debuggerWaitingMsg = document.getElementById("debuggerWaitingMsg");
 		

@@ -201,10 +201,11 @@ def make_chirp():
 	Xw = fft() 
 	
 	
-	# if debug mode is active, save this intermediate figure for later inspection
+	# if debug mode is active, save this intermediate figure for later inspection. This is
+	# only done if for the first receiver and TX signal will be the same 
 	# to plot this figure in a window (i.e not the browser), uncomment the plt.show()
 	# command below
-	if(DEBUG_MODE_ACTIVE):
+	if(DEBUG_MODE_ACTIVE and DEBUG_ACTIVE_RECIEVER==0):
 		fig, (tplot, fplot) = plt.subplots(2, 1, figsize=(8,6))
 		fig.suptitle("Transmitted chirp x(t)", y=0.94)
 		plt.subplots_adjust(top=0.89,hspace=0.3)
@@ -218,7 +219,7 @@ def make_chirp():
 		fplot.set_ylabel("X(f)")
 		
 		#plt.show(block=False)
-		save_figure(fig, "{}_1_chirp.png".format(DEBUG_ACTIVE_RECIEVER))
+		save_figure(fig, "_1_chirp.png".format(DEBUG_ACTIVE_RECIEVER))
 		plt.close()
 	
 	
@@ -276,7 +277,7 @@ def simulate_recieve_signal(td_targets):
 		fplot.set_ylabel("V(f)")
 		
 		#plt.show(block=False)
-		save_figure(fig, "{}_2_receive.png".format(DEBUG_ACTIVE_RECIEVER))
+		save_figure(fig, "{}_1_receive.png".format(DEBUG_ACTIVE_RECIEVER))
 		plt.close()
 	
 	
@@ -323,6 +324,7 @@ def prepare_recieve_signal(samples):
 	fft = pyfftw.builders.ifft(Vw) # compute inverse fft
 	vt = fft() 
 	
+	
 	# if debug mode is active, save this intermediate figure for later inspection
 	# to plot this figure in a window (i.e not the browser), uncomment the plt.show()
 	# command below
@@ -339,8 +341,8 @@ def prepare_recieve_signal(samples):
 		fplot.set_xlabel("f [Hz]")
 		fplot.set_ylabel("V(f)")
 		
-		plt.show()
-		save_figure(fig, "{}_2_receive.png".format(DEBUG_ACTIVE_RECIEVER))
+		#plt.show()
+		save_figure(fig, "{}_1_receive.png".format(DEBUG_ACTIVE_RECIEVER))
 		plt.close()
 	
 	
@@ -370,7 +372,7 @@ def pulse_compression(Xw,Vw):
 	numpy.ndarray
 		processed signal in frequency domain Y(w)
 	"""
-
+	
 	# defines a window over the bandwidth of the transmitted chirp
 	window = rect((f -fc % (N * Δf))/B)
 		
@@ -379,6 +381,10 @@ def pulse_compression(Xw,Vw):
 	
 	# replaces any Nan with 0
 	Yw = np.nan_to_num(Yw) 
+	
+	# MATCHED FILTER 
+	#Hw = np.conj(Xw) # conjugate of X.
+	#Yw = Hw * Vw
 		
 	fft = pyfftw.builders.ifft(Yw) # compute inverse fft
 	yt = fft() 
@@ -386,8 +392,10 @@ def pulse_compression(Xw,Vw):
 
 	# if debug mode is active, save this intermediate figure for later inspection
 	# to plot this figure in a window (i.e not the browser), uncomment the plt.show()
-	# command below
-	if(DEBUG_MODE_ACTIVE):
+	# command below - NB NOT USED CURRENTLY
+	
+	#if(DEBUG_MODE_ACTIVE):
+	if(False):
 		fig, (tplot, fplot) = plt.subplots(2, 1, figsize=(8,6))
 		fig.suptitle("Output of inverse filter y(t)", y=0.94)
 		plt.subplots_adjust(top=0.89,hspace=0.3)
@@ -401,7 +409,7 @@ def pulse_compression(Xw,Vw):
 		fplot.set_ylabel("Y(f)")
 		
 		#plt.show()
-		save_figure(fig, "{}_3_inverse_filter.png".format(DEBUG_ACTIVE_RECIEVER))
+		save_figure(fig, "{}_2_inverse_filter.png".format(DEBUG_ACTIVE_RECIEVER))
 		plt.close()
 	
 	
@@ -440,7 +448,7 @@ def to_analytic_signal(Xw):
 	# command below
 	if(DEBUG_MODE_ACTIVE):
 		fig, (tplot, fplot) = plt.subplots(2, 1, figsize=(8,6))
-		fig.suptitle("Analytic signal y(t)", y=0.94)
+		fig.suptitle("Output of inverse filter y(t) - analytic", y=0.94)
 		plt.subplots_adjust(top=0.89,hspace=0.3)
 		
 		tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
@@ -452,7 +460,7 @@ def to_analytic_signal(Xw):
 		fplot.set_ylabel("Y(f)")
 		
 		#plt.show(block=True)
-		save_figure(fig, "{}_4_analytic.png".format(DEBUG_ACTIVE_RECIEVER))
+		save_figure(fig, "{}_2_filter.png".format(DEBUG_ACTIVE_RECIEVER))
 		plt.close()
 	
 	
@@ -501,7 +509,8 @@ def apply_window_function(Xw):
 	
 	# if debug mode is active, save this intermediate figure for later inspection
 	# to plot this figure in a window (i.e not the browser), uncomment the plt.show()
-	# command below
+	# command below 
+	
 	if(DEBUG_MODE_ACTIVE):
 		fig, (tplot, fplot, hplot) = plt.subplots(3, 1, figsize=(8,6))
 		fig.suptitle("Output after window function y(t)", y=0.94)
@@ -520,7 +529,7 @@ def apply_window_function(Xw):
 		hplot.set_ylabel("H(f)")
 		
 		#plt.show(block=True)
-		save_figure(fig, "{}_5_window.png".format(DEBUG_ACTIVE_RECIEVER))
+		save_figure(fig, "{}_3_window.png".format(DEBUG_ACTIVE_RECIEVER))
 		plt.close()
 	
 	
@@ -556,7 +565,7 @@ def to_baseband(xt):
 	# command below
 	if(DEBUG_MODE_ACTIVE):
 		fig, (tplot, fplot) = plt.subplots(2, 1, figsize=(8,6))
-		fig.suptitle("Output after basbanding y(t)", y=0.94)
+		fig.suptitle("Output after basebanding y(t)", y=0.94)
 		plt.subplots_adjust(top=0.89,hspace=0.4)
 		
 		tplot.plot(t,abs(yt),linewidth=0.7, color="#2da6f7")
@@ -568,7 +577,7 @@ def to_baseband(xt):
 		fplot.set_ylabel("Y(f)")
 		
 		#plt.show()
-		save_figure(fig, "{}_6_baseband.png".format(DEBUG_ACTIVE_RECIEVER))
+		save_figure(fig, "{}_4_baseband.png".format(DEBUG_ACTIVE_RECIEVER))
 		plt.close()
 	
 	
@@ -594,13 +603,27 @@ def phase_compensation(xt):
 	"""
 
 	#phase compensation factors for each receiver in radians, assumes 8 receivers
-	comp_factors = [2.0, -2.1, 2.6, 2.7, -2.1, -2.2, 3.0, -0.7]
+	#comp_factors = [0,0,0,0,0,0,0,0]
+	#comp_factors = [2.0, -2.1, 2.6, 2.7, -2.1, -2.2, 3.0, -0.7]
+	#comp_factors = [-0.1707, 0.5777, -0.9882,-0.9321, -2.5832, 0.4118, -0.5452, 1.9282]
+	#comp_factors = [1.3451, -2.479, 2.368, 2.429, -2.940, -2.639, 2.510, -0.977]
+	comp_factors = [1.3451, 0.3382, 2.368, 2.429, -2.940, -2.639, 2.510, -0.977]
 	
 	# apply compensation factor to current receiver
 	yt = xt * np.exp(1j*comp_factors[DEBUG_ACTIVE_RECIEVER]) 	
 	
 	fft = pyfftw.builders.fft(yt) # compute fft
 	Yw = fft() 
+	
+	
+	plt.figure(num="mag")
+	plt.plot(t,abs(yt),linewidth=0.7)
+	plt.legend(('label0', 'label1', 'label2', 'label3', 'label4', 'label5', 'label6', 'label7'))
+	
+	plt.figure(num="phase")
+	plt.plot(t,np.angle(yt),linewidth=0.7)
+	plt.legend(('label0', 'label1', 'label2', 'label3', 'label4', 'label5', 'label6', 'label7'))
+	plt.show(block=False)
 	
 	return yt, Yw
 
@@ -640,7 +663,7 @@ def range_compensation(xt):
 	# command below
 	if(DEBUG_MODE_ACTIVE):
 		fig, (tplot1, tplot2) = plt.subplots(2, 1, figsize=(8,6))
-		fig.suptitle("Output before and after range compensation", y=0.94)
+		fig.suptitle("Output before and after compensation", y=0.94)
 		plt.subplots_adjust(top=0.89,hspace=0.4)
 		
 		tplot1.plot(t,abs(xt),linewidth=0.7, color="#2da6f7")
@@ -652,7 +675,7 @@ def range_compensation(xt):
 		tplot2.set_ylabel("y(t)")
 		
 		#plt.show(block = True)
-		save_figure(fig, "{}_7_range_comp.png".format(DEBUG_ACTIVE_RECIEVER))
+		save_figure(fig, "{}_5_comp.png".format(DEBUG_ACTIVE_RECIEVER))
 		plt.close()
 	
 	
@@ -707,7 +730,7 @@ def produce_range_profile_sim(td_targets):
 		tplot2.set_ylabel("<y(t)")
 		
 		#plt.show(block = True)
-		save_figure(fig, "{}_8_range_profile.png".format(DEBUG_ACTIVE_RECIEVER))
+		save_figure(fig, "{}_6_range_profile.png".format(DEBUG_ACTIVE_RECIEVER))
 		plt.close()
 	
 	
@@ -762,7 +785,7 @@ def produce_range_profile(samples):
 		tplot2.set_xlabel("d [m]")
 		tplot2.set_ylabel("<y(t)")
 		
-		#plt.show()
+		#plt.show(block=False)
 		save_figure(fig, "{}_8_range_profile.png".format(DEBUG_ACTIVE_RECIEVER))
 		plt.close()
 	
@@ -1213,8 +1236,9 @@ if __name__ == "__main__":
 	
 	# TEST CODE
 	
+	"""
 	generate_1D_image();
-	
+	"""
 	
 	"""
 	start_time_millis = time.time()
@@ -1253,23 +1277,17 @@ if __name__ == "__main__":
 	
 	
 	
-	"""
+	
 	start_time_millis = time.time()
 	start_time_fmt = time.strftime("%H:%M:%S", time.localtime())
 	
-	dict = teensy_interface.request_sonar_data()
-	
-	change_sample_rate(dict.pop("sample_rate"),len(dict["buffer0"])) #NB must pop sample rate
-	
-	range_profiles = generate_all_range_profiles(dict)
-	z = coherent_summing(range_profiles)
+	generate_2D_image()
 	
 	end_time_millis = time.time()
 	runtime = end_time_millis - start_time_millis
 	print("Runtime info: starttime={}, runtime={}s".format(start_time_fmt,round(runtime,2)))
 	
-	plot_2D_image(z)
-	"""
+
 
 
 	
