@@ -211,11 +211,11 @@ def micro_status_process():
 
 if __name__ == "__main__":
 	
-	# to run on local machine - uncomment the following line
-    # app.run(debug=True)
+	#to run on local machine - uncomment the following line
+    app.run(debug=True)
     
     # to run on local network - uncomment the following line
-    app.run(debug=True, host='196.24.184.139')
+    #app.run(debug=True, host='196.24.184.139')
     
     
     
