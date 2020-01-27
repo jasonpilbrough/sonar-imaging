@@ -2,5 +2,11 @@
 webserver/virtual/
 sandbox/
 signal_processing/__pycache__/
+webserver/__pycache__/
 webserver/debug
 signal_processing/debug
+signal_processing/receive_signal/old/
+signal_processing/receive_signal/recorded_RX_signal.txt
+documentation/
+webserver/static/vendor/
+
