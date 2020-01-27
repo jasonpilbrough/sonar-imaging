@@ -170,7 +170,7 @@ global USE_RECORDED_RX; USE_RECORDED_RX = True
 # the file paths used to save and load the recorded signals - note save and load use
 # different files to prevent acidental overwriting
 global RX_SAVE_FILEPATH; RX_SAVE_FILEPATH = "../signal_processing/receive_signal/recorded_RX_signal.txt"
-global RX_LOAD_FILEPATH; RX_LOAD_FILEPATH = "../signal_processing/receive_signal/formatted_RX_signal3.txt"
+global RX_LOAD_FILEPATH; RX_LOAD_FILEPATH = "../signal_processing/receive_signal/formatted_RX_signal.txt"
 
 
 # =============================== FUNCTION DEFINITIONS ================================= #
