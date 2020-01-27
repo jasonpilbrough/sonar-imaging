@@ -68,6 +68,7 @@ import matplotlib;
 matplotlib.use('agg')
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 import random
 import numpy as np
 import pyfftw
@@ -118,7 +119,7 @@ else:   	# case N odd
 
 
 # max field of view (in azimuth) measured from bore-sight in degrees
-global FIELD_OF_VIEW; FIELD_OF_VIEW = 30
+global FIELD_OF_VIEW; FIELD_OF_VIEW = 29
 
 # define radial axis, and azimuth axis  
 global rad; rad = np.linspace(0, r_max, 150)
@@ -1028,6 +1029,9 @@ def plot_2D_image(z):
 	ax.set_thetamin(FIELD_OF_VIEW) # in degrees
 	ax.set_thetamax(-FIELD_OF_VIEW) # in degrees
 	#ax.set_theta_offset(np.pi/2)
+	
+	ax.tick_params(axis='y', colors='black', direction="inout", pad=-20)
+	ax.yaxis.set_major_formatter(FormatStrFormatter('%dm'))
 	
 	plt.pcolormesh(th, r, abs(z), cmap="inferno")
 	plt.plot(azm, r, color='k', ls='none') 
