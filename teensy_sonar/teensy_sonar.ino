@@ -3,7 +3,7 @@
 *
 * DESCRIPTION :
 *       Routines for interfacing with sonar hardware using A/D and D/A 
-*       converters on the Teensy.
+*       converters on the Teensy 3.6 microcontroller.
 *
 * PUBLIC FUNCTIONS :
 *       void    setup()
