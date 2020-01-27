@@ -1,4 +1,4 @@
-""" Provides all the required signal processing and plotting for sonar imaging
+""" Provides all the required signal processing and plotting for sonar imaging.
 
 This script provides the user with all the signal processing steps to generate sonar
 images. Two different types of sonar images can be generated using this script, and are
@@ -104,9 +104,9 @@ global ω; ω = np.linspace(0, (N-1)*Δω, N)  	# freq axis [rad]
 global f; f = ω/(2*np.pi)					# freq axis [Hz]
 global f_axis; 								# alt freq axis, first element maps to 0 Hz
 
-if N%2==0:    # case N even
+if N%2==0:  # case N even
     f_axis =  np.linspace(-N/2, N/2-1, N)*Δf;
-else:   # case N odd
+else:   	# case N odd
     f_axis = np.linspace(-(N-1)/2, (N-1)/2, N)*Δf;  
 
 
@@ -192,7 +192,7 @@ def make_chirp():
 		chirp signal in frequency domain X(w)
 	"""
 	
-	# either read in a file containing the "transmitted" chirp, or create simulated one
+	# either read in a file containing the "transmitted" chirp, or create simulated chirp
 	if(USE_RECORDED_RX):
 		xt = np.loadtxt(RX_LOAD_FILEPATH)
 	else:
@@ -960,6 +960,11 @@ def coherent_summing(range_profiles):
 	z = np.array(z, dtype=complex)
 	
 	
+	# apply window function to receivers to reduce side-lobes in azimuth plane
+	appature_window = [0.5, 0.8,0.95,1,1,0.95,0.8, 0.5]
+	#appature_window = [1,1,1,1,1,1,1,1]
+	
+	
 	for i in range(0, len(rad)): # for every range bin
 		for j in range(0, len(azm)): # for every azimuth angle
 		
@@ -986,7 +991,7 @@ def coherent_summing(range_profiles):
 				index = int(round(two_way_td / Δt))
 
 				# extract value from range profile at index and apply phase compensation
-				value = range_profiles[n][index] * np.exp(2*1j*np.pi*fc*(two_way_td)) #* np.exp(2*1j*np.pi*fc*(two_way_td-tref)) 
+				value = range_profiles[n][index] * np.exp(2*1j*np.pi*fc*(two_way_td)) * appature_window[n] #* np.exp(2*1j*np.pi*fc*(two_way_td-tref)) 
 
 
 
