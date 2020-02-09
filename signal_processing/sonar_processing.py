@@ -619,6 +619,8 @@ def non_ideal_compensation(xt):
 
 	# phase compensation factors for each receiver in radians, assumes 8 receivers
 	phase_comp_factors = [-0.856, -1.329, 1.693, 1.054, 3.171, -2.967, 2.302, -1.429] #comp_factors = [1.3451, -2.479, 2.368, 2.429, -2.940, -2.639, 2.510, -0.977] #comp_factors = [2.0, -2.1, 2.6, 2.7, -2.1, -2.2, 3.0, -0.7] #comp_factors = [-0.1707, 0.5777, -0.9882,-0.9321, -2.5832, 0.4118, -0.5452, 1.9282] #comp_factors = [1.3451, 0.3382, 2.368, 2.429, -2.940, -2.639, 2.510, -0.977]
+	phase_comp_factors = [-2.077,-2.7717,0.1492,-0.803,1.2544,1.2544,0.1028,2.4675]
+	
 	
 	# apply compensation factor to current receiver
 	yt = xt * np.exp(1j*phase_comp_factors[DEBUG_ACTIVE_RECIEVER]) 	
@@ -1275,7 +1277,7 @@ if __name__ == "__main__":
 	# change filepath if run from terminal - assuming this script is run from signal_processing/
 	DEBUG_DIR = "debug"
 	RX_SAVE_FILEPATH = "receive_signal/recorded_RX_signal.txt"
-	RX_LOAD_FILEPATH = "receive_signal/formatted_RX_signal3.txt"
+	RX_LOAD_FILEPATH = "receive_signal/formatted_RX_signal.txt"
 	
 	# set debug mode to active by default in order to view any plots
 	DEBUG_MODE_ACTIVE = True
